@@ -2,7 +2,7 @@ package ch.weiss.terminal;
 
 import java.io.PrintStream;
 
-import ch.weiss.terminal.windows.VirtualTerminal4Windows;
+import ch.weiss.terminal.windows.AnsiTerminalForWindows;
 
 public class AnsiTerminal 
 {
@@ -11,7 +11,7 @@ public class AnsiTerminal
   
   private AnsiTerminal()
   {
-    VirtualTerminal4Windows.enableVirtualTerminalProcessing();
+    AnsiTerminalForWindows.enableVirtualTerminalProcessing();
   }
 
   public static AnsiTerminal get()
