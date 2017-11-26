@@ -13,6 +13,7 @@ public class AnsiTerminal
   private final FontStyleInline fontStyle = new FontStyleInline();
   private final ForegroundColor color = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
+  private final Graphics graphics = new Graphics(this);
   private final Cursor cursor = new Cursor();;
   
   private AnsiTerminal()
@@ -77,6 +78,11 @@ public class AnsiTerminal
     return write(EscCode.CLEAR_SCREEN);
   }
   
+  public Graphics graphics()
+  {
+    return graphics;
+  }
+
   public ForegroundColor color()
   {
     return color;
