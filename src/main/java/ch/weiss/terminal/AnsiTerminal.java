@@ -2,12 +2,18 @@ package ch.weiss.terminal;
 
 import java.io.PrintStream;
 
+import ch.weiss.check.Check;
+import ch.weiss.terminal.graphics.Graphics;
 import ch.weiss.terminal.windows.AnsiTerminalForWindows;
 
 public class AnsiTerminal 
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
-  private static final PrintStream OUT = System.out; 
+  private static final PrintStream OUT = System.out;
+  private final FontStyleInline fontStyle = new FontStyleInline();
+  private final ForegroundColor color = new ForegroundColor();
+  private final BackgroundColor backgroundColor = new BackgroundColor();
+  private final Cursor cursor = new Cursor();;
   
   private AnsiTerminal()
   {
@@ -21,6 +27,8 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
+    Check.parameter("text").value(text).isNotNull();
+    
     OUT.print(text);
     return this;
   }
@@ -37,6 +45,14 @@ public class AnsiTerminal
     return this;
   }
   
+  public AnsiTerminal write(EscCode command)
+  {
+    Check.parameter("command").value(command).isNotNull();
+    
+    OUT.print(command.escCode());
+    return this;
+  }
+  
   public AnsiTerminal newLine()
   {
     OUT.println();
@@ -45,144 +61,148 @@ public class AnsiTerminal
   
   public AnsiTerminal reset()
   {
-    return sgr(0);
+    return write(Style.RESET);
   }
   
-  public AnsiTerminal sgr(int command)
+  public AnsiTerminal style(Style style)
   {
-    return csi(command+"m");
-  }
+    Check.parameter("style").value(style).isNotNull();
 
-  public AnsiTerminal sgr(int command1, int command2)
-  {
-    return csi(command1+";"+command2+"m");
-  }
-
-  public AnsiTerminal csi(String command)
-  {
-    return esc("["+command);
-  }
-  
-  private AnsiTerminal csi(int argument, String command)
-  {
-    return csi(argument+command);
-  }
-  
-  private AnsiTerminal csi(int argument1, int argument2, String command)
-  {
-    return csi(argument1+";"+argument2+command);
-  }
-  
-  public AnsiTerminal esc(String command)
-  {
-    return write("\033"+command);
+    style.style().forEach(this::write);
+    return this;
   }
   
   public AnsiTerminal clear()
   {
-    return csi(2, "J");
+    return write(EscCode.CLEAR_SCREEN);
   }
-
+  
   public ForegroundColor color()
   {
-    return new ForegroundColor();
+    return color;
+  }
+  
+  public AnsiTerminal color(Color color)
+  {
+    Check.parameter("color").value(color).isNotNull();
+
+    return write(color.foreground());
   }
   
   public BackgroundColor backgroundColor()
   {
-    return new BackgroundColor();
+    return backgroundColor;
   }
   
-  public Style style()
+  public AnsiTerminal backgroundColor(Color color)
   {
-    return new Style();
+    Check.parameter("color").value(color).isNotNull();
+ 
+    return write(color.background());
+  }
+  
+  public FontStyleInline fontStyle()
+  {
+    return fontStyle ;
+  }
+  
+  public AnsiTerminal fontStyle(FontStyle fontStyle)
+  {
+    Check.parameter("fontStyle").value(fontStyle).isNotNull();
+
+    return write(fontStyle.fontStyle());
   }
   
   public Cursor cursor()
   {
-    return new Cursor();
+    return cursor ;
   }
-  
+    
   public class ForegroundColor
   {
     public AnsiTerminal black()
     {
-      return sgr(30);
+      return color(Color.BLACK);
     }
-
+    
     public AnsiTerminal red()
     {
-      return sgr(31);
+      return color(Color.RED);
     }
     
     public AnsiTerminal green()
     {
-      return sgr(32);
+      return color(Color.GREEN);
     }
     
     public AnsiTerminal yellow()
     {
-      return sgr(33);
+      return color(Color.YELLOW);
     }
     
     public AnsiTerminal blue()
     {
-      return sgr(34);
+      return color(Color.BLUE);
     }
     
     public AnsiTerminal magenta()
     {
-      return sgr(35);
+      return color(Color.MAGENTA);
     }
     
     public AnsiTerminal cyan()
     {
-      return sgr(36);
+      return color(Color.CYAN);
     }
     
     public AnsiTerminal white()
     {
-      return sgr(37);
+      return color(Color.WHITE);
     }
 
     public AnsiTerminal brightBlack()
     {
-      return sgr(1, 30);
+      return color(Color.BRIGHT_BLACK);
     }
 
     public AnsiTerminal brightRed()
     {
-      return sgr(1, 31);
+      return color(Color.BRIGHT_RED);
     }
     
     public AnsiTerminal brightGreen()
     {
-      return sgr(1, 32);
+      return color(Color.BRIGHT_GREEN);
     }
     
     public AnsiTerminal brightYellow()
     {
-      return sgr(1, 33);
+      return color(Color.BRIGHT_YELLOW);
     }
     
     public AnsiTerminal brightBlue()
     {
-      return sgr(1, 34);
+      return color(Color.BRIGHT_BLUE);
     }
     
     public AnsiTerminal brightMagenta()
     {
-      return sgr(1, 35);
+      return color(Color.BRIGHT_MAGENTA);
     }
     
     public AnsiTerminal brightCyan()
     {
-      return sgr(1, 36);
+      return color(Color.BRIGHT_CYAN);
     }
     
     public AnsiTerminal brightWhite()
     {
-      return sgr(1, 37);
+      return color(Color.BRIGHT_WHITE);
+    }
+    
+    public AnsiTerminal rgb(int red, int green, int blue)
+    {
+      return color(new Color(red, green, blue));
     }
   }
 
@@ -190,98 +210,107 @@ public class AnsiTerminal
   {
     public AnsiTerminal black()
     {
-      return sgr(40);
+      return backgroundColor(Color.BLACK);
     }
-
+    
     public AnsiTerminal red()
     {
-      return sgr(41);
+      return backgroundColor(Color.RED);
     }
     
     public AnsiTerminal green()
     {
-      return sgr(42);
+      return backgroundColor(Color.GREEN);
     }
     
     public AnsiTerminal yellow()
     {
-      return sgr(43);
+      return backgroundColor(Color.YELLOW);
     }
     
     public AnsiTerminal blue()
     {
-      return sgr(44);
+      return backgroundColor(Color.BLUE);
     }
     
     public AnsiTerminal magenta()
     {
-      return sgr(45);
+      return backgroundColor(Color.MAGENTA);
     }
     
     public AnsiTerminal cyan()
     {
-      return sgr(46);
+      return backgroundColor(Color.CYAN);
     }
     
     public AnsiTerminal white()
     {
-      return sgr(47);
+      return backgroundColor(Color.WHITE);
     }
 
     public AnsiTerminal brightBlack()
     {
-      return sgr(100);
+      return backgroundColor(Color.BRIGHT_BLACK);
     }
 
     public AnsiTerminal brightRed()
     {
-      return sgr(101);
+      return backgroundColor(Color.BRIGHT_RED);
     }
     
     public AnsiTerminal brightGreen()
     {
-      return sgr(102);
+      return backgroundColor(Color.BRIGHT_GREEN);
     }
     
     public AnsiTerminal brightYellow()
     {
-      return sgr(103);
+      return backgroundColor(Color.BRIGHT_YELLOW);
     }
     
     public AnsiTerminal brightBlue()
     {
-      return sgr(104);
+      return backgroundColor(Color.BRIGHT_BLUE);
     }
     
     public AnsiTerminal brightMagenta()
     {
-      return sgr(105);
+      return backgroundColor(Color.BRIGHT_MAGENTA);
     }
     
     public AnsiTerminal brightCyan()
     {
-      return sgr(106);
+      return backgroundColor(Color.BRIGHT_CYAN);
     }
     
     public AnsiTerminal brightWhite()
     {
-      return sgr(107);
+      return backgroundColor(Color.BRIGHT_WHITE);
+    }
+    
+    public AnsiTerminal rgb(int red, int green, int blue)
+    {
+      return backgroundColor(new Color(red, green, blue));
     }
   }
   
-  public class Style
+  public class FontStyleInline
   {
 
     public AnsiTerminal bold()
     {
-      return sgr(1);
+      return fontStyle(FontStyle.BOLD);
     }
 
     public AnsiTerminal underline()
     {
-      return sgr(4);
+      return fontStyle(FontStyle.UNDERLINE);
     }
-    
+
+    public AnsiTerminal negative()
+    {
+      return fontStyle(FontStyle.NEGATIVE);
+    }
   }
 
   public class Cursor
@@ -293,7 +322,8 @@ public class AnsiTerminal
     
     public AnsiTerminal up(int count)
     {
-      return csi(count, "A");
+      Check.parameter("count").value(count).isPositive().isNotZero();
+      return csi("A", count);
     }
     
     public AnsiTerminal down()
@@ -303,7 +333,8 @@ public class AnsiTerminal
     
     public AnsiTerminal down(int count)
     {
-      return csi(count, "B");
+      Check.parameter("count").value(count).isPositive().isNotZero();
+      return csi("B", count);
     }
 
     public AnsiTerminal forward()
@@ -313,7 +344,8 @@ public class AnsiTerminal
 
     public AnsiTerminal forward(int count)
     {
-      return csi(count, "C");
+      Check.parameter("count").value(count).isPositive().isNotZero();
+      return csi("C", count);
     }
     
     public AnsiTerminal backward()
@@ -323,12 +355,15 @@ public class AnsiTerminal
     
     public AnsiTerminal backward(int count)
     {
-      return csi(count, "D");
+      Check.parameter("count").value(count).isPositive().isNotZero();
+      return csi("D", count);
     }
 
     public AnsiTerminal position(int line, int column)
     {
-      return csi(line, column, "H");
+      Check.parameter("line").value(line).isPositive().isNotZero();
+      Check.parameter("column").value(column).isPositive().isNotZero();
+      return csi("H", line, column);
     }
 
     public AnsiTerminal previousLine()
@@ -338,7 +373,8 @@ public class AnsiTerminal
 
     public AnsiTerminal previousLine(int lines)
     {
-      return csi(lines, "F");
+      Check.parameter("lines").value(lines).isPositive().isNotZero();
+      return csi("F", lines);
     }
 
     public AnsiTerminal nextLine()
@@ -348,7 +384,8 @@ public class AnsiTerminal
     
     public AnsiTerminal nextLine(int lines)
     {
-      return csi(lines, "E");
+      Check.parameter("lines").value(lines).isPositive().isNotZero();
+      return csi("E", lines);
     }
 
     public AnsiTerminal hide()
@@ -363,7 +400,13 @@ public class AnsiTerminal
 
     public AnsiTerminal column(int column)
     {
-      return csi(column, "G");
+      Check.parameter("column").value(column).isPositive().isNotZero();
+      return csi("G", column);
+    }
+    
+    private AnsiTerminal csi(String command, int... arguments)
+    {
+      return write(EscCode.csi(command, arguments));
     }
   }
 }
