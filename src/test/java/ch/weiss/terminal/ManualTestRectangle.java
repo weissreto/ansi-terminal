@@ -28,15 +28,19 @@ public class ManualTestRectangle extends AbstractManualTest
 
   public void drawThickRectangle()
   {
-    terminal.graphics().drawRectangle(new Rectangle(new Point(2,y), new Point(5, y+3)), LineStyle.DOUBLE_LINE);
+    terminal.graphics().lineStyle(LineStyle.DOUBLE_LINE);
+    terminal.graphics().drawRectangle(new Rectangle(new Point(2,y), new Point(5, y+3)));
     terminal.cursor().nextLine(2);
+    terminal.graphics().reset();
     y+=8;
   }
 
   public void drawXRectangle()
   {
-    terminal.graphics().drawRectangle(new Rectangle(new Point(2,y), new Point(25, y+3)), LineStyle.X);
+    terminal.graphics().lineStyle(LineStyle.X);
+    terminal.graphics().drawRectangle(new Rectangle(new Point(2,y), new Point(25, y+3)));
     terminal.cursor().nextLine(2);
+    terminal.graphics().reset();
     y+=8;
   }
 

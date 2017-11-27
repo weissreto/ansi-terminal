@@ -42,13 +42,18 @@ public class Point
     switch(direction)
     {
       case UP:
-        return new Point(x, y-distance);
+        return move(0, -distance);
       case DOWN:
-        return new Point(x, y+distance);
+        return move(0, +distance);
       case RIGHT:
-        return new Point(x+distance, y);
+        return move(distance, 0);
       default:
-        return new Point(x-distance, y);
+        return move(-distance, 0);
     }
+  }
+  
+  public Point move(int deltaX, int deltaY)
+  {
+    return new Point(x+deltaX, y+deltaY);
   }
 }

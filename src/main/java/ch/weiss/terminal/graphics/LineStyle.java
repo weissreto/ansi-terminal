@@ -1,5 +1,7 @@
 package ch.weiss.terminal.graphics;
 
+import ch.weiss.check.Check;
+
 public class LineStyle
 {
   public static final LineStyle SINGLE_LINE = new LineStyle('\u250C','\u2500','\u2510','\u2502','\u2518','\u2500','\u2514', '\u2502');
@@ -7,6 +9,7 @@ public class LineStyle
   public static final LineStyle X = new LineStyle('X');
   public static final LineStyle STAR = new LineStyle('*');
   public static final LineStyle PLUS = new LineStyle('+');
+  public static final LineStyle DOT = new LineStyle('.');
   
   private final char topLeft;
   private final char topRight;
@@ -72,5 +75,20 @@ public class LineStyle
   public char left()
   {
     return left;
+  }
+
+  public char forDirection(Direction direction)
+  {
+    Check.parameter("direction").value(direction).isNotNull();
+    if (direction == Direction.UP || direction == Direction.DOWN)
+    {
+      return left;
+    }
+    return top;
+  }
+
+  public char forAllDirections()
+  {
+    return top;
   }
 }

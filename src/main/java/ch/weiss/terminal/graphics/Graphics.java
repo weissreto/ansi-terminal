@@ -2,15 +2,51 @@ package ch.weiss.terminal.graphics;
 
 import ch.weiss.check.Check;
 import ch.weiss.terminal.AnsiTerminal;
+import ch.weiss.terminal.Color;
+import ch.weiss.terminal.FontStyle;
+import ch.weiss.terminal.Style;
 
 public class Graphics
 {
   private final AnsiTerminal terminal;
+  private LineStyle lineStyle = LineStyle.SINGLE_LINE;
 
   public Graphics(AnsiTerminal terminal)
   {
     this.terminal = terminal;
   }
+  
+  public void color(Color color)
+  {
+    terminal.color(color);
+  }
+  
+  public void backgroundColor(Color color)
+  {
+    terminal.backgroundColor(color);
+  }
+  
+  public void fontStyle(FontStyle fontStyle)
+  {
+    terminal.fontStyle(fontStyle);
+  }
+  
+  public void style(Style style)
+  {
+    terminal.style(style);
+  }
+  
+  public void lineStyle(LineStyle lineStyle)
+  {
+    this.lineStyle = lineStyle; 
+  }
+  
+  public void reset()
+  {
+    terminal.reset();
+    lineStyle = LineStyle.SINGLE_LINE;
+  }
+  
 
   public void drawCharacter(Point position, char character)
   {
@@ -73,15 +109,9 @@ public class Graphics
   
   public void drawHorizontalLine(Point position, int length)
   {
-    drawHorizontalLine(position, length, LineStyle.SINGLE_LINE);
-  }
-
-  public void drawHorizontalLine(Point position, int length, LineStyle lineStyle)
-  {
-    Check.parameter("lineStyle").value(lineStyle).isNotNull();
     drawHorizontalLine(position, length, lineStyle.top());
   }
-  
+
   public void drawHorizontalLine(Point position, int length, char lineStyle)
   {
     Check.parameter("position").value(position).isNotNull();
@@ -97,12 +127,6 @@ public class Graphics
 
   public void drawVerticalLine(Point position, int length)
   {
-    drawVerticalLine(position, length, LineStyle.SINGLE_LINE);
-  }
-
-  public void drawVerticalLine(Point position, int length, LineStyle lineStyle)
-  {
-    Check.parameter("lineStyle").value(lineStyle).isNotNull();
     drawVerticalLine(position, length, lineStyle.left());
   }
   
@@ -120,15 +144,16 @@ public class Graphics
 
   public void drawLine(Point position, Direction direction, int length)
   {
-    drawLine(position, direction, length, LineStyle.SINGLE_LINE);
+    Check.parameter("direction").value(direction).isNotNull();
+    char lineChar = lineStyle.forDirection(direction);
+    drawLine(position, direction, length, lineChar);
   }
 
-  public void drawLine(Point position, Direction direction, int length, LineStyle lineStyle)
+  public void drawLine(Point position, Direction direction, int length, char lineStyle)
   {
     Check.parameter("position").value(position).isNotNull();
     Check.parameter("direction").value(direction).isNotNull();
     Check.parameter("length").value(length).isPositive();
-    Check.parameter("lineStyle").value(lineStyle).isNotNull();
     
     switch(direction)
     {
@@ -148,7 +173,12 @@ public class Graphics
     }
   }
 
-  public void drawLine(Point p1, Point p2, LineStyle lineStyle)
+  public void drawLine(Point p1, Point p2)
+  {
+    drawLine(p1, p2, lineStyle.forAllDirections());
+  }
+    
+  public void drawLine(Point p1, Point p2, char lineStyle)
   {
     Check.parameter("p1").value(p1).isNotNull();
     Check.parameter("p2").value(p2).isNotNull();
@@ -165,7 +195,7 @@ public class Graphics
 
     while (true) 
     {
-      drawCharacter(new Point(x, y), lineStyle.top());
+      drawCharacter(new Point(x, y), lineStyle);
 
       if (x == p2.x() && y == p2.y()) 
       {
@@ -187,28 +217,23 @@ public class Graphics
   
   public void drawRectangle(Rectangle rectangle)
   {
-    drawRectangle(rectangle, LineStyle.SINGLE_LINE);
-  }
-  
-  public void drawRectangle(Rectangle rectangle, LineStyle style)
-  {
     if (rectangle.height() < 2 || rectangle.width() < 2)
     {
       return;
     }
-    drawCharacter(rectangle.topLeft(), style.topLeft());
-    drawCharacter(rectangle.topRight(), style.topRight());
-    drawCharacter(rectangle.bottomRight(), style.bottomRight());
-    drawCharacter(rectangle.bottomLeft(), style.bottomLeft());
+    drawCharacter(rectangle.topLeft(), lineStyle.topLeft());
+    drawCharacter(rectangle.topRight(), lineStyle.topRight());
+    drawCharacter(rectangle.bottomRight(), lineStyle.bottomRight());
+    drawCharacter(rectangle.bottomLeft(), lineStyle.bottomLeft());
     if (rectangle.width() > 2)
     {
-      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, style.top());
-      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, style.bottom());
+      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, lineStyle.top());
+      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, lineStyle.bottom());
     }
     if (rectangle.height() > 2)
     {
-      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-2, style.left());
-      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-2, style.right());
+      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-2, lineStyle.left());
+      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-2, lineStyle.right());
     }
   }
   

@@ -17,6 +17,11 @@ public class Rectangle
     this.bottomRight = bottomRight;
   }
   
+  public Rectangle(Point topLeft, int width, int height)
+  {
+    this(topLeft, new Point(topLeft.x()+width, topLeft.y()+height));
+  }
+
   public Point topLeft()
   {
     return topLeft;
@@ -25,6 +30,66 @@ public class Rectangle
   public Point bottomRight()
   {
     return bottomRight;
+  }
+  
+  public Point topRight()
+  {
+    return new Point(rightX(), topY());
+  }
+
+  public Point bottomLeft()
+  {
+    return new Point(leftX(), bottomY());
+  }
+  
+  public Point centerLeft()
+  {
+    return new Point(leftX(), topY() + height()/2); 
+  }
+
+  public Point centerRight()
+  {
+    return new Point(rightX(), topY() + height()/2); 
+  }
+  
+  public Point centerTop()
+  {
+    return new Point(leftX() + width()/2, topY()); 
+  }
+
+  public Point centerBottom()
+  {
+    return new Point(leftX() + width()/2, bottomY()); 
+  }
+  
+  public Rectangle moveTo(Direction direction, int distance)
+  {
+    return new Rectangle(topLeft.moveTo(direction, distance), bottomRight.moveTo(direction, distance));
+  }
+  
+  public Rectangle move(int deltaX, int deltaY)
+  {
+    return new Rectangle(topLeft.move(deltaX, deltaY), bottomRight.move(deltaX, deltaY));
+  }
+  
+  public Rectangle moveTopLeftTo(Direction direction, int distance)
+  {
+    return new Rectangle(topLeft.moveTo(direction, distance), bottomRight);
+  }
+
+  public Rectangle moveTopLeft(int deltaX, int deltaY)
+  {
+    return new Rectangle(topLeft.move(deltaX, deltaY), bottomRight);
+  }
+  
+  public Rectangle moveBottomRightTo(Direction direction, int distance)
+  {
+    return new Rectangle(topLeft, bottomRight.moveTo(direction, distance));
+  }
+
+  public Rectangle moveBottomRight(int deltaX, int deltaY)
+  {
+    return new Rectangle(topLeft, bottomRight.move(deltaX, deltaY));
   }
   
   public int leftX()
@@ -49,21 +114,11 @@ public class Rectangle
   
   public int width()
   {
-    return rightX() - leftX() + 1;
+    return rightX() - leftX();
   }
   
   public int height()
   {
-    return bottomY() - topY() + 1;
-  }
-
-  public Point topRight()
-  {
-    return new Point(rightX(), topY());
-  }
-
-  public Point bottomLeft()
-  {
-    return new Point(leftX(), bottomY());
+    return bottomY() - topY();
   }
 }
