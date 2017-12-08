@@ -48,7 +48,7 @@ public class Style
     
     public StyleBuilder withColor(Color color)
     {
-      Check.parameter("color").value(color).isNotNull();
+      Check.parameter("color").withValue(color).isNotNull();
 
       this.color = color;
       return this;
@@ -56,7 +56,7 @@ public class Style
 
     public StyleBuilder withBackgroundColor(Color backgroundColor)
     {
-      Check.parameter("backgroundColor").value(backgroundColor).isNotNull();
+      Check.parameter("backgroundColor").withValue(backgroundColor).isNotNull();
       
       this.backgroundColor = backgroundColor;
       return this;
@@ -64,7 +64,7 @@ public class Style
     
     public StyleBuilder withFontStyle(FontStyle fontStyle)
     {
-      Check.parameter("fontStyle").value(fontStyle).isNotNull();
+      Check.parameter("fontStyle").withValue(fontStyle).isNotNull();
       
       this.fontStyle = fontStyle;
       return this;

@@ -47,7 +47,7 @@ public class Color
 
   private void rangeCheck(int value, String parameter)
   {
-    Check.parameter(parameter).value(value).isInRange(0, 255);
+    Check.parameter(parameter).withValue(value).isInRange(0, 255);
   }
 
   EscCode foreground()

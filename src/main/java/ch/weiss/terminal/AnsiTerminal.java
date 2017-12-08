@@ -28,7 +28,7 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
-    Check.parameter("text").value(text).isNotNull();
+    Check.parameter("text").withValue(text).isNotNull();
     
     OUT.print(text);
     return this;
@@ -48,7 +48,7 @@ public class AnsiTerminal
   
   public AnsiTerminal write(EscCode command)
   {
-    Check.parameter("command").value(command).isNotNull();
+    Check.parameter("command").withValue(command).isNotNull();
     
     OUT.print(command.escCode());
     return this;
@@ -67,7 +67,7 @@ public class AnsiTerminal
   
   public AnsiTerminal style(Style style)
   {
-    Check.parameter("style").value(style).isNotNull();
+    Check.parameter("style").withValue(style).isNotNull();
 
     style.style().forEach(this::write);
     return this;
@@ -90,7 +90,7 @@ public class AnsiTerminal
   
   public AnsiTerminal color(Color color)
   {
-    Check.parameter("color").value(color).isNotNull();
+    Check.parameter("color").withValue(color).isNotNull();
 
     return write(color.foreground());
   }
@@ -102,7 +102,7 @@ public class AnsiTerminal
   
   public AnsiTerminal backgroundColor(Color color)
   {
-    Check.parameter("color").value(color).isNotNull();
+    Check.parameter("color").withValue(color).isNotNull();
  
     return write(color.background());
   }
@@ -114,7 +114,7 @@ public class AnsiTerminal
   
   public AnsiTerminal fontStyle(FontStyle fontStyle)
   {
-    Check.parameter("fontStyle").value(fontStyle).isNotNull();
+    Check.parameter("fontStyle").withValue(fontStyle).isNotNull();
 
     return write(fontStyle.fontStyle());
   }
@@ -328,7 +328,7 @@ public class AnsiTerminal
     
     public AnsiTerminal up(int count)
     {
-      Check.parameter("count").value(count).isPositive().isNotZero();
+      Check.parameter("count").withValue(count).isPositive().isNotZero();
       return csi("A", count);
     }
     
@@ -339,7 +339,7 @@ public class AnsiTerminal
     
     public AnsiTerminal down(int count)
     {
-      Check.parameter("count").value(count).isPositive().isNotZero();
+      Check.parameter("count").withValue(count).isPositive().isNotZero();
       return csi("B", count);
     }
 
@@ -350,7 +350,7 @@ public class AnsiTerminal
 
     public AnsiTerminal forward(int count)
     {
-      Check.parameter("count").value(count).isPositive().isNotZero();
+      Check.parameter("count").withValue(count).isPositive().isNotZero();
       return csi("C", count);
     }
     
@@ -361,14 +361,14 @@ public class AnsiTerminal
     
     public AnsiTerminal backward(int count)
     {
-      Check.parameter("count").value(count).isPositive().isNotZero();
+      Check.parameter("count").withValue(count).isPositive().isNotZero();
       return csi("D", count);
     }
 
     public AnsiTerminal position(int line, int column)
     {
-      Check.parameter("line").value(line).isPositive().isNotZero();
-      Check.parameter("column").value(column).isPositive().isNotZero();
+      Check.parameter("line").withValue(line).isPositive().isNotZero();
+      Check.parameter("column").withValue(column).isPositive().isNotZero();
       return csi("H", line, column);
     }
 
@@ -379,7 +379,7 @@ public class AnsiTerminal
 
     public AnsiTerminal previousLine(int lines)
     {
-      Check.parameter("lines").value(lines).isPositive().isNotZero();
+      Check.parameter("lines").withValue(lines).isPositive().isNotZero();
       return csi("F", lines);
     }
 
@@ -390,7 +390,7 @@ public class AnsiTerminal
     
     public AnsiTerminal nextLine(int lines)
     {
-      Check.parameter("lines").value(lines).isPositive().isNotZero();
+      Check.parameter("lines").withValue(lines).isPositive().isNotZero();
       return csi("E", lines);
     }
 
@@ -406,7 +406,7 @@ public class AnsiTerminal
 
     public AnsiTerminal column(int column)
     {
-      Check.parameter("column").value(column).isPositive().isNotZero();
+      Check.parameter("column").withValue(column).isPositive().isNotZero();
       return csi("G", column);
     }
     

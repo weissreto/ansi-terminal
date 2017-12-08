@@ -9,10 +9,10 @@ public class Rectangle
   
   public Rectangle(Point topLeft, Point bottomRight)
   {
-    Check.parameter("topLeft").value(topLeft).isNotNull();
-    Check.parameter("bottomRight").value(bottomRight).isNotNull();
-    Check.parameter("topLeft.x()").value(topLeft.x()).isSmallerOrEqualTo(bottomRight.x());
-    Check.parameter("topLeft.y()").value(topLeft.y()).isSmallerOrEqualTo(bottomRight.y());
+    Check.parameter("topLeft").withValue(topLeft).isNotNull();
+    Check.parameter("bottomRight").withValue(bottomRight).isNotNull();
+    Check.parameter("topLeft.x()").withValue(topLeft.x()).isLessOrEqualTo(bottomRight.x());
+    Check.parameter("topLeft.y()").withValue(topLeft.y()).isLessOrEqualTo(bottomRight.y());
     this.topLeft = topLeft;
     this.bottomRight = bottomRight;
   }

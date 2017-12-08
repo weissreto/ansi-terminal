@@ -5,6 +5,19 @@
   <artifactId>ansi-terminal</artifactId>
   <version>0.0.2-SNAPSHOT</version>
 
+  <dependencies>
+    <dependency>
+      <groupId>ch.weiss</groupId>
+      <artifactId>ansi-terminal-for-windows</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.weiss</groupId>
+      <artifactId>check</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -15,7 +28,7 @@
           <target>1.8</target>
         </configuration>
       </plugin>
-            <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId> 
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.10</version>
@@ -53,17 +66,11 @@
             ansi-terminal,
             ansi-terminal-for-windows,
             jna,
-            jna-platform
+            jna-platform,
+            check
           </includeArtifactIds>
         </configuration>      
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>ch.weiss</groupId>
-      <artifactId>ansi-terminal-for-windows</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
 </project>

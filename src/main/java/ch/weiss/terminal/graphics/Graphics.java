@@ -50,7 +50,7 @@ public class Graphics
 
   public void drawCharacter(Point position, char character)
   {
-    Check.parameter("position").value(position).isNotNull();
+    Check.parameter("position").withValue(position).isNotNull();
 
     terminal
       .cursor()
@@ -60,8 +60,8 @@ public class Graphics
 
   public void drawText(Point position, String text)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("text").value(text).isNotNull();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("text").withValue(text).isNotNull();
        
     terminal
         .cursor()
@@ -71,8 +71,8 @@ public class Graphics
   
   public void drawVerticalText(Point position, String text)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("text").value(text).isNotNull();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("text").withValue(text).isNotNull();
     
     for (int pos = 0; pos < text.length(); pos++)
     {
@@ -83,9 +83,9 @@ public class Graphics
 
   public void drawText(Point position, Direction direction, String text)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("direction").value(direction).isNotNull();
-    Check.parameter("text").value(text).isNotNull();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("direction").withValue(direction).isNotNull();
+    Check.parameter("text").withValue(text).isNotNull();
     
     switch(direction)
     {
@@ -114,8 +114,8 @@ public class Graphics
 
   public void drawHorizontalLine(Point position, int length, char lineStyle)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("length").value(length).isPositive();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("length").withValue(length).isPositive();
 
     StringBuilder line = new StringBuilder();
     for (int pos=0; pos < length; pos++)
@@ -132,8 +132,8 @@ public class Graphics
   
   public void drawVerticalLine(Point position, int length, char lineStyle)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("length").value(length).isPositive();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("length").withValue(length).isPositive();
     
     for (int pos = 0; pos < length; pos++)
     {
@@ -144,16 +144,16 @@ public class Graphics
 
   public void drawLine(Point position, Direction direction, int length)
   {
-    Check.parameter("direction").value(direction).isNotNull();
+    Check.parameter("direction").withValue(direction).isNotNull();
     char lineChar = lineStyle.forDirection(direction);
     drawLine(position, direction, length, lineChar);
   }
 
   public void drawLine(Point position, Direction direction, int length, char lineStyle)
   {
-    Check.parameter("position").value(position).isNotNull();
-    Check.parameter("direction").value(direction).isNotNull();
-    Check.parameter("length").value(length).isPositive();
+    Check.parameter("position").withValue(position).isNotNull();
+    Check.parameter("direction").withValue(direction).isNotNull();
+    Check.parameter("length").withValue(length).isPositive();
     
     switch(direction)
     {
@@ -180,8 +180,8 @@ public class Graphics
     
   public void drawLine(Point p1, Point p2, char lineStyle)
   {
-    Check.parameter("p1").value(p1).isNotNull();
-    Check.parameter("p2").value(p2).isNotNull();
+    Check.parameter("p1").withValue(p1).isNotNull();
+    Check.parameter("p2").withValue(p2).isNotNull();
     
     int dx = Math.abs(p2.x() - p1.x());
     int dy = Math.abs(p2.y() - p1.y());

@@ -16,13 +16,13 @@ public class EscCode
 
   public static EscCode esc(String command)
   {
-    Check.parameter("command").value(command).isNotNull();
+    Check.parameter("command").withValue(command).isNotNull();
     return new EscCode(ESCAPE+command);
   }
   
   public static EscCode csi(String command, int... arguments)
   {
-    Check.parameter("command").value(command).isNotNull();
+    Check.parameter("command").withValue(command).isNotNull();
 
     StringBuilder builder = new StringBuilder();
     builder.append("[");

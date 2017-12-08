@@ -79,7 +79,7 @@ public class LineStyle
 
   public char forDirection(Direction direction)
   {
-    Check.parameter("direction").value(direction).isNotNull();
+    Check.parameter("direction").withValue(direction).isNotNull();
     if (direction == Direction.UP || direction == Direction.DOWN)
     {
       return left;
