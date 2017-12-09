@@ -4,7 +4,7 @@ public class ManualTestCursorPosition extends AbstractManualTest
 {
   public static void main(String[] args) throws Exception
   {
-    AnsiTerminal.get().clear().cursor().position(0,0);
+    AnsiTerminal.get().clear().screen().cursor().position(0,0);
     new ManualTestCursorPosition().main();
   }
   

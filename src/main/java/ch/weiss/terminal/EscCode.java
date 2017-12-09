@@ -5,7 +5,6 @@ import ch.weiss.check.Check;
 public class EscCode
 {
   private static final String ESCAPE = "\033";
-  public static final EscCode CLEAR_SCREEN = csi("J", 2);
   
   private final String escCode;
   

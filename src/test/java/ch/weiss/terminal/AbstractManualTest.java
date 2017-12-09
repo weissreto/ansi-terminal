@@ -51,7 +51,7 @@ public abstract class AbstractManualTest
   
   protected AbstractManualTest clear()
   {
-    terminal.clear().cursor().position(1,1);
+    terminal.clear().screen().cursor().position(1,1);
     return this;
   }
   

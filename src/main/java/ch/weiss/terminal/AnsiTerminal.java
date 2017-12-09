@@ -15,6 +15,7 @@ public class AnsiTerminal
   private final BackgroundColor backgroundColor = new BackgroundColor();
   private final Graphics graphics = new Graphics(this);
   private final Cursor cursor = new Cursor();
+  private final Clear clear = new Clear(this);
   
   private AnsiTerminal()
   {
@@ -28,8 +29,6 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
-    Check.parameter("text").withValue(text).isNotNull();
-    
     OUT.print(text);
     return this;
   }
@@ -73,9 +72,9 @@ public class AnsiTerminal
     return this;
   }
   
-  public AnsiTerminal clear()
+  public Clear clear()
   {
-    return write(EscCode.CLEAR_SCREEN);
+    return clear;
   }
   
   public Graphics graphics()
@@ -414,5 +413,52 @@ public class AnsiTerminal
     {
       return write(EscCode.csi(command, arguments));
     }
+  }
+  
+  public static class Clear
+  {
+    private static final EscCode CLEAR_SCREEN_TO_END = EscCode.csi("J", 0);
+    private static final EscCode CLEAR_SCREEN_FROM_BEGIN = EscCode.csi("J", 1);
+    private static final EscCode CLEAR_SCREEN = EscCode.csi("J", 2);
+    private static final EscCode CLEAR_LINE_TO_END = EscCode.csi("K", 0);
+    private static final EscCode CLEAR_LINE_FROM_BEGIN = EscCode.csi("K", 1);
+    private static final EscCode CLEAR_LINE = EscCode.csi("K", 2);
+    
+    private AnsiTerminal term;
+    
+    private Clear(AnsiTerminal term)
+    {
+      this.term = term;
+    }
+    
+    public AnsiTerminal screen()
+    {
+      return term.write(CLEAR_SCREEN);
+    }
+    
+    public AnsiTerminal screenFromBegin()
+    {
+      return term.write(CLEAR_SCREEN_FROM_BEGIN);
+    }
+    
+    public AnsiTerminal screenToEnd()
+    {
+      return term.write(CLEAR_SCREEN_TO_END);
+    }
+    
+    public AnsiTerminal line()
+    {
+      return term.write(CLEAR_LINE);
+    }
+    
+    public AnsiTerminal lineFromBegin()
+    {
+      return term.write(CLEAR_LINE_FROM_BEGIN);
+    }
+    
+    public AnsiTerminal lineToEnd()
+    {
+      return term.write(CLEAR_LINE_TO_END);
+    }    
   }
 }
