@@ -9,7 +9,7 @@ import ch.weiss.terminal.Style;
 public class Graphics
 {
   private final AnsiTerminal terminal;
-  private LineStyle lineStyle = LineStyle.SINGLE_LINE;
+  private LineStyle currentLineStyle = LineStyle.SINGLE_LINE;
 
   public Graphics(AnsiTerminal terminal)
   {
@@ -38,13 +38,13 @@ public class Graphics
   
   public void lineStyle(LineStyle lineStyle)
   {
-    this.lineStyle = lineStyle; 
+    this.currentLineStyle = lineStyle; 
   }
   
   public void reset()
   {
     terminal.reset();
-    lineStyle = LineStyle.SINGLE_LINE;
+    currentLineStyle = LineStyle.SINGLE_LINE;
   }
   
 
@@ -74,10 +74,11 @@ public class Graphics
     Check.parameter("position").withValue(position).isNotNull();
     Check.parameter("text").withValue(text).isNotNull();
     
+    Point nextPosition = position;
     for (int pos = 0; pos < text.length(); pos++)
     {
-      drawCharacter(position, text.charAt(pos));
-      position = position.moveTo(Direction.DOWN, 1);
+      drawCharacter(nextPosition, text.charAt(pos));
+      nextPosition = nextPosition.moveTo(Direction.DOWN, 1);
     }
   }
 
@@ -93,23 +94,26 @@ public class Graphics
         drawText(position, text);
         break;
       case LEFT:
-        position = position.moveTo(direction, text.length());
-        text = reverseText(text);
-        drawText(position, text);
+        Point pos = position.moveTo(direction, text.length());
+        String reverseText = reverseText(text);
+        drawText(pos, text);
         break;
       case DOWN:
         drawVerticalText(position, text);
         break;
       case UP:
-        position = position.moveTo(direction, text.length());
-        text = reverseText(text);
-        drawVerticalText(position, text);
+        pos = position.moveTo(direction, text.length());
+        reverseText = reverseText(text);
+        drawVerticalText(pos, reverseText);
+        break;
+      default:
+        throw new IllegalArgumentException("Parameter direction unknown value "+direction);
     }
   }
   
   public void drawHorizontalLine(Point position, int length)
   {
-    drawHorizontalLine(position, length, lineStyle.top());
+    drawHorizontalLine(position, length, currentLineStyle.top());
   }
 
   public void drawHorizontalLine(Point position, int length, char lineStyle)
@@ -127,7 +131,7 @@ public class Graphics
 
   public void drawVerticalLine(Point position, int length)
   {
-    drawVerticalLine(position, length, lineStyle.left());
+    drawVerticalLine(position, length, currentLineStyle.left());
   }
   
   public void drawVerticalLine(Point position, int length, char lineStyle)
@@ -135,17 +139,18 @@ public class Graphics
     Check.parameter("position").withValue(position).isNotNull();
     Check.parameter("length").withValue(length).isPositive();
     
+    Point nextPosition = position;
     for (int pos = 0; pos < length; pos++)
     {
-      drawCharacter(position, lineStyle);
-      position = position.moveTo(Direction.DOWN, 1);
+      drawCharacter(nextPosition, lineStyle);
+      nextPosition = nextPosition.moveTo(Direction.DOWN, 1);
     }
   }
 
   public void drawLine(Point position, Direction direction, int length)
   {
     Check.parameter("direction").withValue(direction).isNotNull();
-    char lineChar = lineStyle.forDirection(direction);
+    char lineChar = currentLineStyle.forDirection(direction);
     drawLine(position, direction, length, lineChar);
   }
 
@@ -161,21 +166,24 @@ public class Graphics
         drawHorizontalLine(position, length, lineStyle);
         break;
       case LEFT:
-        position = position.moveTo(direction, length-1);
-        drawHorizontalLine(position, length, lineStyle);
+        Point pos = position.moveTo(direction, length-1);
+        drawHorizontalLine(pos, length, lineStyle);
         break;
       case DOWN:
         drawVerticalLine(position, length, lineStyle);
         break;
       case UP:
-        position = position.moveTo(direction, length-1);
-        drawVerticalLine(position, length, lineStyle);
+        pos = position.moveTo(direction, length-1);
+        drawVerticalLine(pos, length, lineStyle);
+        break;
+      default:
+        throw new IllegalArgumentException("Parameter direction unknown value " + direction);
     }
   }
 
   public void drawLine(Point p1, Point p2)
   {
-    drawLine(p1, p2, lineStyle.forAllDirections());
+    drawLine(p1, p2, currentLineStyle.forAllDirections());
   }
     
   public void drawLine(Point p1, Point p2, char lineStyle)
@@ -221,23 +229,23 @@ public class Graphics
     {
       return;
     }
-    drawCharacter(rectangle.topLeft(), lineStyle.topLeft());
-    drawCharacter(rectangle.topRight(), lineStyle.topRight());
-    drawCharacter(rectangle.bottomRight(), lineStyle.bottomRight());
-    drawCharacter(rectangle.bottomLeft(), lineStyle.bottomLeft());
+    drawCharacter(rectangle.topLeft(), currentLineStyle.topLeft());
+    drawCharacter(rectangle.topRight(), currentLineStyle.topRight());
+    drawCharacter(rectangle.bottomRight(), currentLineStyle.bottomRight());
+    drawCharacter(rectangle.bottomLeft(), currentLineStyle.bottomLeft());
     if (rectangle.width() > 2)
     {
-      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, lineStyle.top());
-      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, lineStyle.bottom());
+      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, currentLineStyle.top());
+      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, currentLineStyle.bottom());
     }
     if (rectangle.height() > 2)
     {
-      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-2, lineStyle.left());
-      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-2, lineStyle.right());
+      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-2, currentLineStyle.left());
+      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-2, currentLineStyle.right());
     }
   }
   
-  private String reverseText(String text)
+  private static String reverseText(String text)
   {
     StringBuilder builder = new StringBuilder();
     for (int pos = text.length()-1; pos >= 0; pos--)

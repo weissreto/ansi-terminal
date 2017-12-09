@@ -10,11 +10,11 @@ public class AnsiTerminal
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
   private static final PrintStream OUT = System.out;
-  private final FontStyleInline fontStyle = new FontStyleInline();
-  private final ForegroundColor color = new ForegroundColor();
+  private final FontStyleInline fontStyleInline = new FontStyleInline();
+  private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
   private final Graphics graphics = new Graphics(this);
-  private final Cursor cursor = new Cursor();;
+  private final Cursor cursor = new Cursor();
   
   private AnsiTerminal()
   {
@@ -85,7 +85,7 @@ public class AnsiTerminal
 
   public ForegroundColor color()
   {
-    return color;
+    return foregroundColor;
   }
   
   public AnsiTerminal color(Color color)
@@ -109,7 +109,7 @@ public class AnsiTerminal
   
   public FontStyleInline fontStyle()
   {
-    return fontStyle ;
+    return fontStyleInline ;
   }
   
   public AnsiTerminal fontStyle(FontStyle fontStyle)

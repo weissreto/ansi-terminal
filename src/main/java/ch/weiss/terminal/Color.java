@@ -45,7 +45,7 @@ public class Color
     rangeCheck(blue, "blue");
   }
 
-  private void rangeCheck(int value, String parameter)
+  private static void rangeCheck(int value, String parameter)
   {
     Check.parameter(parameter).withValue(value).isInRange(0, 255);
   }

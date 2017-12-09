@@ -10,17 +10,17 @@ public abstract class AbstractManualTest
   
   protected void title(String title)
   {
-    title = title.toUpperCase();
+    String upperCaseTitle = title.toUpperCase();
     terminal.newLine().newLine().style(TITLE);
     terminal.write("  ");
-    for (int pos = 0; pos < title.length(); pos++)
+    for (int pos = 0; pos < upperCaseTitle.length(); pos++)
     {
-      terminal.write(title.charAt(pos));
+      terminal.write(upperCaseTitle.charAt(pos));
       terminal.write(" ");
     }
     terminal.newLine();
     terminal.write("  ");
-    for (int pos = 0; pos < title.length()-1; pos++)
+    for (int pos = 0; pos < upperCaseTitle.length()-1; pos++)
     {
       terminal.write("==");
     }
@@ -63,6 +63,7 @@ public abstract class AbstractManualTest
     }
     catch (InterruptedException e)
     {    
+      throw new RuntimeException(e);
     }
   }
   

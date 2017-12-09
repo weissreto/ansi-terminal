@@ -46,7 +46,7 @@ public class Style
     private Color backgroundColor;
     private FontStyle fontStyle;
     
-    public StyleBuilder withColor(Color color)
+    public StyleBuilder withColor(@SuppressWarnings("hiding") Color color)
     {
       Check.parameter("color").withValue(color).isNotNull();
 
@@ -54,7 +54,7 @@ public class Style
       return this;
     }
 
-    public StyleBuilder withBackgroundColor(Color backgroundColor)
+    public StyleBuilder withBackgroundColor(@SuppressWarnings("hiding") Color backgroundColor)
     {
       Check.parameter("backgroundColor").withValue(backgroundColor).isNotNull();
       
@@ -62,7 +62,7 @@ public class Style
       return this;
     }
     
-    public StyleBuilder withFontStyle(FontStyle fontStyle)
+    public StyleBuilder withFontStyle(@SuppressWarnings("hiding") FontStyle fontStyle)
     {
       Check.parameter("fontStyle").withValue(fontStyle).isNotNull();
       
