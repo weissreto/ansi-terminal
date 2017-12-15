@@ -3,48 +3,52 @@ package ch.weiss.terminal.table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import ch.weiss.terminal.AnsiTerminal;
+import ch.weiss.terminal.table.Column.ColumnBuilder;
 
-public class Table
+public class Table<R>
 {
-  private final List<Column> columns = new ArrayList<>();
-  private final List<Row> rows = new ArrayList<>();
-  private Row currentRow;
+  private final List<Column<R,?>> columns = new ArrayList<>();
+  private final List<R> rows = new ArrayList<>();
   AnsiTerminal term = AnsiTerminal.get();
-  private RowSorter sorter;
+  private RowSorter<R> sorter;
   
-  public void addColumn(Column column)
+  public void addColumn(Column<R,?> column)
   {
     columns.add(column);
   }
-
-  public void addRow()
+  
+  public <V> ColumnBuilder<R, V> createColumn(String title, int width, Function<R, V> valueProvider)
   {
-    currentRow = new Row();
-    rows.add(currentRow);
+    return Column.create(title, width, valueProvider);
   }
 
-  public void addValue(Object value)
+  public ColumnBuilder<R, R> createColumn(String title, int width)
   {
-    currentRow.addValue(value);
+    return Column.create(title, width);
+  }
+
+  public void addRow(R row)
+  {
+    rows.add(row);
   }
 
   public void print()
   {
     sortRows();
-    for (Column column : columns)
+    for (Column<R,?> column : columns)
     {
       column.printTitle();
     }
     term.clear().lineToEnd();
     term.newLine();
-    for (Row row : rows)
+    for (R row : rows)
     {
-      int colPos = 0;
-      for (Column column : columns)
+      for (Column<R,?> column : columns)
       {
-        column.printCell(row.getValue(colPos++));
+        column.printCell(row);
       }
       term.clear().lineToEnd();
       term.newLine();
@@ -62,19 +66,18 @@ public class Table
     Collections.sort(rows, sorter.getComparator());
   }
 
-  public RowSorter sortColumn(String columnTitle)
+  public RowSorter<R> sortColumn(String columnTitle)
   {
-    Column column = findColumn(columnTitle);
+    Column<R,?> column = findColumn(columnTitle);
     if (column == null)
     {
       throw new IllegalArgumentException("Column with title "+columnTitle+" not found given by parameter columnTitle");
     }
-    int pos = columns.indexOf(column);
-    sorter = new RowSorter(column, pos);
+    sorter = new RowSorter<>(column);
     return sorter;
   }
 
-  private Column findColumn(String columnTitle)
+  private Column<R,?> findColumn(String columnTitle)
   {
     return columns
         .stream()

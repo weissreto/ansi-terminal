@@ -8,25 +8,22 @@ import ch.weiss.check.Check;
 import ch.weiss.terminal.AnsiTerminal;
 import ch.weiss.terminal.Style;
 
-public class Column
+public class Column<R,V>
 {
   private final String title;
   private final int width;
   private final Style titleStyle;
-  private final Function<Object, Style> cellStyler;
-  private final Function<Object, String> textProvider;
-  private final Comparator<Object> sorter;
+  private final Function<R, V> valueProvider;
+  private final Function<V, String> textProvider;
+  private final Function<V, Style> cellStyler;
+  private final Comparator<V> sorter;
   private final AnsiTerminal term = AnsiTerminal.get();
 
-  public static ColumnBuilder create(String title, int width)
-  {
-    return new ColumnBuilder(title, width);
-  }
-
-  private Column(ColumnBuilder builder)
+  private Column(ColumnBuilder<R,V> builder)
   {
     this.title = builder.title;
     this.width = builder.width;
+    this.valueProvider = builder.valueProvider;
     this.titleStyle = builder.titleStyle;
     this.cellStyler = builder.cellStyler;
     this.textProvider = builder.textProvider;
@@ -45,8 +42,9 @@ public class Column
     return title;
   }
 
-  void printCell(Object value)
+  void printCell(R row)
   {
+    V value = valueProvider.apply(row);
     if (cellStyler != null)
     {
       term.style(cellStyler.apply(value));
@@ -88,39 +86,70 @@ public class Column
     return builder.toString();
   }
   
-  public int compareValue(Object value1, Object value2)
+  public int compareValue(R row1, R row2)
   {
+    V value1 = valueProvider.apply(row1);
+    V value2 = valueProvider.apply(row2);
     return sorter.compare(value1, value2);
   }
 
-  private int defaultSorter(Object value1, Object value2)
+  @SuppressWarnings("unchecked")
+  private int defaultSorter(V value1, V value2)
   {
+    if (value1 == null && value2 == null)
+    {
+      return 0;
+    }
+    if (value1 == null && value2 != null)
+    {
+      return -1;
+    }
+    if (value1 != null && value2 == null)
+    {
+      return 1;
+    }
+    if (value1 instanceof Comparable)
+    {
+      return ((Comparable<V>)value1).compareTo(value2);
+    }
     String text1 = textProvider.apply(value1);
     String text2 = textProvider.apply(value2);
     return Comparator.<String>nullsFirst((t1, t2)-> t1.compareTo(t2))
         .compare(text1,  text2);
   }
-  
-  
-  public static final class ColumnBuilder
+
+  static <R,V> ColumnBuilder<R,V> create(String title, int width, Function<R, V> valueProvider)
+  {
+    return new ColumnBuilder<>(title, width, valueProvider);
+  }
+
+  static <R> ColumnBuilder<R,R> create(String title, int width)
+  {
+    return new ColumnBuilder<>(title, width, row -> row);
+  }
+
+  public static final class ColumnBuilder<R, V>
   {
     private String title;
     private int width;
     private Style titleStyle;
-    private Function<Object, Style> cellStyler;
-    private Function<Object, String> textProvider = Objects::toString;
-    private Comparator<Object> sorter;
+    private Function<R, V> valueProvider;
+    private Function<V, String> textProvider = Objects::toString;
+    private Function<V, Style> cellStyler;
+    private Comparator<V> sorter;
 
-    public ColumnBuilder(String title, int width)
+    public ColumnBuilder(String title, int width, Function<R, V> valueProvider)
     {
       Check.parameter("title").withValue(title).isNotNull();
       Check.parameter("width").withValue(width).isPositive().isNotZero();
+      Check.parameter("valueProvider").withValue(valueProvider).isNotNull();
       this.title = title;
       this.width = width;
+      this.valueProvider = valueProvider;
     }
     
     @SuppressWarnings("hiding")
-    public ColumnBuilder withTextProvider(Function<Object, String> textProvider)
+    public ColumnBuilder<R,V> withTextProvider(Function<V, String> textProvider)
     {
       Check.parameter("textProvider").withValue(textProvider).isNotNull();
       this.textProvider = textProvider;
@@ -128,36 +157,36 @@ public class Column
     }
     
     @SuppressWarnings("hiding")
-    public ColumnBuilder withTitleStyle(Style titleStyle)
+    public ColumnBuilder<R,V> withTitleStyle(Style titleStyle)
     {
       Check.parameter("titleStyle").withValue(titleStyle).isNotNull();
       this.titleStyle = titleStyle;
       return this;
     }
 
-    public ColumnBuilder withCellStyle(Style cellStyle)
+    public ColumnBuilder<R,V> withCellStyle(Style cellStyle)
     {
       Check.parameter("cellStyle").withValue(cellStyle).isNotNull();
       return withCellStyler(value -> cellStyle);
     }
     
-    public ColumnBuilder withCellStyler(@SuppressWarnings("hiding") Function<Object, Style> cellStyler)
+    public ColumnBuilder<R,V> withCellStyler(@SuppressWarnings("hiding") Function<V, Style> cellStyler)
     {
       Check.parameter("cellStyler").withValue(cellStyler).isNotNull();
       this.cellStyler = cellStyler;
       return this;
     }
     
-    public ColumnBuilder withSorter(@SuppressWarnings("hiding") Comparator<Object> sorter)
+    public ColumnBuilder<R,V> withSorter(@SuppressWarnings("hiding") Comparator<V> sorter)
     {
       Check.parameter("sorter").withValue(sorter).isNotNull();
       this.sorter = sorter;
       return this;
     }
     
-    public Column toColumn()
+    public Column<R,V> toColumn()
     {
-      return new Column(this); 
+      return new Column<>(this); 
     }
   }
 }

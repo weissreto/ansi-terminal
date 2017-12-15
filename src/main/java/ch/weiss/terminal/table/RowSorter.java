@@ -2,28 +2,24 @@ package ch.weiss.terminal.table;
 
 import java.util.Comparator;
 
-public class RowSorter
+public class RowSorter<R>
 {
-  private final Column column;
-  private final int columnPos;
+  private final Column<R,?> column;
   private boolean ascending = true;
 
-  RowSorter(Column column, int columnPos)
+  RowSorter(Column<R,?> column)
   {
     this.column = column;
-    this.columnPos = columnPos;
   }
   
-  Comparator<Row> getComparator()
+  Comparator<R> getComparator()
   {
     return this::compare;
   }
 
-  private int compare(Row row1, Row row2)
+  private int compare(R row1, R row2)
   {
-    Object value1 = row1.getValue(columnPos);
-    Object value2 = row2.getValue(columnPos);
-    int result = column.compareValue(value1, value2);
+    int result = column.compareValue(row1, row2);
     if (!ascending)
     {
       result = result * -1;
