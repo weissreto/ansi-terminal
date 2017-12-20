@@ -67,7 +67,7 @@ public class Column<R,V>
 
   private String trimToWidth(String str)
   {
-    if (str.length() < width-1)
+    if (str.length() < width)
     {
       return str;
     }
