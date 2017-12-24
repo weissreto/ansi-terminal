@@ -2,6 +2,8 @@ package ch.weiss.terminal;
 
 import java.io.PrintStream;
 
+import com.sun.jna.Platform;
+
 import ch.weiss.check.Check;
 import ch.weiss.terminal.graphics.Graphics;
 import ch.weiss.terminal.windows.AnsiTerminalForWindows;
@@ -9,7 +11,7 @@ import ch.weiss.terminal.windows.AnsiTerminalForWindows;
 public class AnsiTerminal 
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
-  private static final PrintStream OUT = System.out;
+  private final PrintStream out;
   private final FontStyleInline fontStyleInline = new FontStyleInline();
   private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
@@ -19,7 +21,12 @@ public class AnsiTerminal
   
   private AnsiTerminal()
   {
-    AnsiTerminalForWindows.enableVirtualTerminalProcessing();
+    if (Platform.isWindows())
+    {
+      AnsiTerminalForWindows.enableVirtualTerminalProcessing();
+      AnsiTerminalForWindows.enableUtf8CodePage();
+    }
+    out = System.out;
   }
 
   public static AnsiTerminal get()
@@ -46,19 +53,19 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
-    OUT.print(text);
+    out.print(text);
     return this;
   }
   
   public AnsiTerminal write(char ch)
   {
-    OUT.print(ch);
+    out.print(ch);
     return this;
   }
   
   public AnsiTerminal write(long value)
   {
-    OUT.print(value);
+    out.print(value);
     return this;
   }
   
@@ -66,13 +73,13 @@ public class AnsiTerminal
   {
     Check.parameter("command").withValue(command).isNotNull();
     
-    OUT.print(command.escCode());
+    out.print(command.escCode());
     return this;
   }
   
   public AnsiTerminal newLine()
   {
-    OUT.println();
+    out.println();
     return this;
   }
   
