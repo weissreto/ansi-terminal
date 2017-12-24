@@ -27,6 +27,23 @@ public class AnsiTerminal
     return INSTANCE;
   }
   
+  public AnsiTerminal write(StyledText text)
+  {
+    for (StyledText.Part part : text.parts())
+    {
+      if (part.style() == null)
+      {
+        reset();
+      }
+      else
+      {
+        style(part.style());
+      }
+      write(part.text());
+    }
+    return this;
+  }
+  
   public AnsiTerminal write(String text)
   {
     OUT.print(text);
