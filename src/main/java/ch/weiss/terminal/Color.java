@@ -29,6 +29,7 @@ public class Color
   public static final Color BRIGHT_WHITE = new Color(EscCode.sgr(1, 37), EscCode.sgr(107));
   
   public static final List<Color> STANDARD_COLORS = Arrays.asList(BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE); 
+  public static final List<Color> BRIGHT_STANDARD_COLORS = Arrays.asList(BRIGHT_BLACK, BRIGHT_RED, BRIGHT_GREEN, BRIGHT_YELLOW, BRIGHT_BLUE, BRIGHT_MAGENTA, BRIGHT_CYAN, BRIGHT_WHITE); 
 
   private Color(EscCode foregroundEscCode, EscCode backgroundEscCode)
   {
