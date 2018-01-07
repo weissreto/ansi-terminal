@@ -1,5 +1,6 @@
 package ch.weiss.terminal;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
 import com.sun.jna.Platform;
@@ -24,6 +25,7 @@ public class AnsiTerminal
     if (Platform.isWindows())
     {
       AnsiTerminalForWindows.enableVirtualTerminalProcessing();
+      AnsiTerminalForWindows.disableLineAndEchoInput();
       AnsiTerminalForWindows.enableUtf8CodePage();
     }
     out = System.out;
@@ -352,7 +354,7 @@ public class AnsiTerminal
     public AnsiTerminal up(int count)
     {
       Check.parameter("count").withValue(count).isPositive().isNotZero();
-      return csi("A", count);
+      return csi('A', count);
     }
     
     public AnsiTerminal down()
@@ -363,7 +365,7 @@ public class AnsiTerminal
     public AnsiTerminal down(int count)
     {
       Check.parameter("count").withValue(count).isPositive().isNotZero();
-      return csi("B", count);
+      return csi('B', count);
     }
 
     public AnsiTerminal forward()
@@ -374,7 +376,7 @@ public class AnsiTerminal
     public AnsiTerminal forward(int count)
     {
       Check.parameter("count").withValue(count).isPositive().isNotZero();
-      return csi("C", count);
+      return csi('C', count);
     }
     
     public AnsiTerminal backward()
@@ -385,16 +387,49 @@ public class AnsiTerminal
     public AnsiTerminal backward(int count)
     {
       Check.parameter("count").withValue(count).isPositive().isNotZero();
-      return csi("D", count);
+      return csi('D', count);
     }
 
     public AnsiTerminal position(int line, int column)
     {
-      Check.parameter("line").withValue(line).isPositive().isNotZero();
-      Check.parameter("column").withValue(column).isPositive().isNotZero();
-      return csi("H", line, column);
+      Check.parameter("line").withValue(line).isPositive();
+      Check.parameter("column").withValue(column).isPositive();
+      return csi('H', line, column);
     }
-
+    
+    public AnsiTerminal position(Position position)
+    {
+      Check.parameter("position").withValue(position).isNotNull();
+      return position(position.line(), position.column());
+    }
+    
+    public Position position()
+    {
+      write(EscCode.csi('n', 6));
+      try
+      {
+        EscCode result = EscCode.readFrom(System.in);
+        if (!result.isCsi() || result.csiCommand() != 'R')
+        {
+          throw new RuntimeException("Could not evaluate position of cursor. Received wrong escape code "+result);
+        }
+        return new Position(result.csiArgument(0), result.csiArgument(1));
+      }
+      catch (IOException ex)
+      {
+        throw new RuntimeException("Could not evaluate position of cursor", ex);
+      }
+    }
+    
+    public Position maxPosition()
+    {
+      Position currentPosition = position();
+      position(999, 999);
+      Position maxPosition = position();
+      position(currentPosition);
+      return maxPosition;
+    }
+    
     public AnsiTerminal previousLine()
     {
       return previousLine(1);
@@ -403,7 +438,7 @@ public class AnsiTerminal
     public AnsiTerminal previousLine(int lines)
     {
       Check.parameter("lines").withValue(lines).isPositive().isNotZero();
-      return csi("F", lines);
+      return csi('F', lines);
     }
 
     public AnsiTerminal nextLine()
@@ -414,7 +449,7 @@ public class AnsiTerminal
     public AnsiTerminal nextLine(int lines)
     {
       Check.parameter("lines").withValue(lines).isPositive().isNotZero();
-      return csi("E", lines);
+      return csi('E', lines);
     }
 
     public AnsiTerminal hide()
@@ -430,23 +465,28 @@ public class AnsiTerminal
     public AnsiTerminal column(int column)
     {
       Check.parameter("column").withValue(column).isPositive().isNotZero();
-      return csi("G", column);
+      return csi('G', column);
     }
     
-    private AnsiTerminal csi(String command, int... arguments)
+    private AnsiTerminal csi(char command, int... arguments)
     {
       return write(EscCode.csi(command, arguments));
+    }
+
+    private AnsiTerminal csi(String command)
+    {
+      return write(EscCode.csi(command));
     }
   }
   
   public static class Clear
   {
-    private static final EscCode CLEAR_SCREEN_TO_END = EscCode.csi("J", 0);
-    private static final EscCode CLEAR_SCREEN_FROM_BEGIN = EscCode.csi("J", 1);
-    private static final EscCode CLEAR_SCREEN = EscCode.csi("J", 2);
-    private static final EscCode CLEAR_LINE_TO_END = EscCode.csi("K", 0);
-    private static final EscCode CLEAR_LINE_FROM_BEGIN = EscCode.csi("K", 1);
-    private static final EscCode CLEAR_LINE = EscCode.csi("K", 2);
+    private static final EscCode CLEAR_SCREEN_TO_END = EscCode.csi('J', 0);
+    private static final EscCode CLEAR_SCREEN_FROM_BEGIN = EscCode.csi('J', 1);
+    private static final EscCode CLEAR_SCREEN = EscCode.csi('J', 2);
+    private static final EscCode CLEAR_LINE_TO_END = EscCode.csi('K', 0);
+    private static final EscCode CLEAR_LINE_FROM_BEGIN = EscCode.csi('K', 1);
+    private static final EscCode CLEAR_LINE = EscCode.csi('K', 2);
     
     private AnsiTerminal term;
     
