@@ -90,9 +90,9 @@
           </execution>
         </executions>
         <configuration>
-          <overWriteReleases>false</overWriteReleases>
-          <overWriteSnapshots>false</overWriteSnapshots>
-          <overWriteIfNewer>false</overWriteIfNewer>
+          <overWriteReleases>true</overWriteReleases>
+          <overWriteSnapshots>true</overWriteSnapshots>
+          <overWriteIfNewer>true</overWriteIfNewer>
           <stripVersion>false</stripVersion>
           <excludeArtifactIds>${project.artifactId},${project.artifactId}.source</excludeArtifactIds>
           <includeArtifactIds>
