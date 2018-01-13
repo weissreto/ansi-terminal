@@ -1,7 +1,5 @@
 package ch.rweiss.terminal;
 
-import ch.rweiss.terminal.Position;
-
 public class ManualTestGetCursorPosition extends AbstractManualTest
 {
   public static void main(String[] args) throws Exception

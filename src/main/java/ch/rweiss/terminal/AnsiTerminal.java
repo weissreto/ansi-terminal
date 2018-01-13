@@ -7,6 +7,7 @@ import com.sun.jna.Platform;
 
 import ch.rweiss.check.Check;
 import ch.rweiss.terminal.graphics.Graphics;
+import ch.rweiss.terminal.linux.AnsiTerminalForLinux;
 import ch.rweiss.terminal.windows.AnsiTerminalForWindows;
 
 public class AnsiTerminal 
@@ -26,8 +27,13 @@ public class AnsiTerminal
     {
       AnsiTerminalForWindows.enableVirtualTerminalProcessing();
       AnsiTerminalForWindows.disableLineAndEchoInput();
-      AnsiTerminalForWindows.enableUtf8CodePage();
+      AnsiTerminalForWindows.changeToUtf8CodePage();
     }
+    else if (Platform.isLinux())
+    {
+      AnsiTerminalForLinux.disableLineAndEchoInput();
+    }
+      
     out = System.out;
   }
 

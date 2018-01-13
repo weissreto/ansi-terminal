@@ -1,10 +1,10 @@
 package ch.rweiss.terminal;
 
-public class ManualTestCursorVisiblility extends AbstractManualTest
+public class ManualTestCursorVisibility extends AbstractManualTest
 {
   public static void main(String[] args) throws Exception
   {
-    new ManualTestCursorVisiblility().main();
+    new ManualTestCursorVisibility().main();
   }
   
   public void showAndHide()
