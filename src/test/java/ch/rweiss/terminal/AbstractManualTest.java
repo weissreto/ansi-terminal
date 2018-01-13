@@ -2,11 +2,6 @@ package ch.rweiss.terminal;
 
 import java.lang.reflect.Method;
 
-import ch.rweiss.terminal.AnsiTerminal;
-import ch.rweiss.terminal.Color;
-import ch.rweiss.terminal.FontStyle;
-import ch.rweiss.terminal.Style;
-
 public abstract class AbstractManualTest
 {
   protected AnsiTerminal terminal = AnsiTerminal.get();
@@ -90,5 +85,6 @@ public abstract class AbstractManualTest
         method.invoke(this);
       } 
     }
+    terminal.cursor().nextLine();
   }
 }

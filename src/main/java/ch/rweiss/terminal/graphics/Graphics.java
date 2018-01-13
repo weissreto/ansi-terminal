@@ -225,7 +225,7 @@ public class Graphics
   
   public void drawRectangle(Rectangle rectangle)
   {
-    if (rectangle.height() < 2 || rectangle.width() < 2)
+    if (rectangle.height() < 1 || rectangle.width() < 1)
     {
       return;
     }
@@ -233,15 +233,15 @@ public class Graphics
     drawCharacter(rectangle.topRight(), currentLineStyle.topRight());
     drawCharacter(rectangle.bottomRight(), currentLineStyle.bottomRight());
     drawCharacter(rectangle.bottomLeft(), currentLineStyle.bottomLeft());
-    if (rectangle.width() > 2)
+    if (rectangle.width() > 1)
     {
-      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, currentLineStyle.top());
-      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-2, currentLineStyle.bottom());
+      drawHorizontalLine(rectangle.topLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-1, currentLineStyle.top());
+      drawHorizontalLine(rectangle.bottomLeft().moveTo(Direction.RIGHT, 1), rectangle.width()-1, currentLineStyle.bottom());
     }
-    if (rectangle.height() > 2)
+    if (rectangle.height() > 1)
     {
-      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-2, currentLineStyle.left());
-      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-2, currentLineStyle.right());
+      drawVerticalLine(rectangle.topLeft().moveTo(Direction.DOWN, 1), rectangle.height()-1, currentLineStyle.left());
+      drawVerticalLine(rectangle.topRight().moveTo(Direction.DOWN, 1), rectangle.height()-1, currentLineStyle.right());
     }
   }
   
