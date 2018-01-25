@@ -61,6 +61,11 @@ public class Rectangle
   {
     return new Point(leftX() + width()/2, bottomY()); 
   }
+
+  public Point center()
+  {
+    return new Point(leftX()+width()/2, topY()+height()/2);
+  }
   
   public Rectangle moveTo(Direction direction, int distance)
   {
