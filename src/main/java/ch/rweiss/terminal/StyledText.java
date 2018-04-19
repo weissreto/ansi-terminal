@@ -62,37 +62,69 @@ public class StyledText
     return new StyledText(mergedParts);
   }
   
-  public StyledText abbreviate(int length)
+  public StyledText appendLeft(String text)
   {
+    if (length() == 0)
+    {
+      return new StyledText(text, firstPart().style());
+    }    
+    return new StyledText(text, firstPart().style()).append(this); 
+  }
+
+  public StyledText sub(int startPos, int length)
+  {
+    Check.parameter("startPos").withValue(startPos).isGreaterOrEqualTo(0).isLessThan(length());
     Check.parameter("length").withValue(length).isGreaterOrEqualTo(0);
     
-    if (length() <= length)
+    if (startPos == 0 && length >= length())
     {
       return this;
     }
-    if (length == 0)
+    List<Part> subParts = new ArrayList<>();
+    int partStartPos = 0;
+    int totalLength = 0;
+    int endPos = startPos + length;
+    for (Part part : parts)
     {
-      return new StyledText("", firstPart().style());
-    }
-    List<Part> newParts = new ArrayList<>();
-    int lengthSum = 0;
-    for (Part part : parts)      
-    {
-      if (lengthSum + part.text.length() >= length)
+      int partLength = part.length();
+      int partEndPos = partStartPos+partLength;
+      if (partStartPos <= startPos && partEndPos > startPos)
       {
-        int missingLength = length - lengthSum;
-        if (missingLength > 0)
-        {
-          String abbreviatedText = part.text.substring(0, missingLength);
-          Part abbreviatedPart = new Part(abbreviatedText, part.style);
-          newParts.add(abbreviatedPart);
-        }
-        return new StyledText(newParts);
+        Part startPart = part.subtext(startPos-partStartPos, length);
+        totalLength = startPart.length();
+        subParts.add(startPart);        
       }
-      newParts.add(part);
-      lengthSum = lengthSum + part.text.length();
+      else if (partStartPos > startPos && partEndPos < endPos)
+      {
+        subParts.add(part);
+        totalLength = part.length();
+      }
+      else if (partStartPos > startPos && partEndPos >= endPos)
+      {
+        Part endPart = part.subtext(0, partLength - (partEndPos- endPos));
+        subParts.add(endPart);
+        totalLength = endPart.length();
+      }
+      if (totalLength >= length && subParts.size() > 0)
+      {
+        break;
+      }
+      partStartPos += part.length();
     }
-    return new StyledText(newParts);
+    return new StyledText(subParts);
+  }   
+
+  public StyledText left(int length)
+  {
+    return sub(0, length);
+  }
+  
+  public StyledText right(int length)
+  {
+    int startPos = length()-length;
+    startPos = Math.max(0, startPos);
+    startPos = Math.min(length()-1, startPos);
+    return sub(startPos, length);
   }
   
   public int length()
@@ -129,6 +161,25 @@ public class StyledText
       this.style = style;
     }
     
+    public Part subtext(int startPos, int length)
+    {
+      if (startPos == 0  && length > length())
+      {
+        return this;
+      }
+      if (startPos + length > length())
+      {
+        length = length()-startPos;
+      }
+      int endPos = startPos+length; 
+      return new Part(text.substring(startPos, endPos), style);
+    }
+
+    public int length()
+    {
+      return text.length();
+    }
+
     String text()
     {
       return text;
@@ -138,5 +189,11 @@ public class StyledText
     {
       return style;
     }
-  }   
+    
+    @Override
+    public String toString()
+    {
+      return text;
+    }
+  }
 }

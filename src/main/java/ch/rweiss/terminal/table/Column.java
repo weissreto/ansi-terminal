@@ -12,7 +12,9 @@ import ch.rweiss.terminal.StyledText;
 public class Column<R,V>
 {
   private final StyledText title;
-  private final int width;
+  private int width;
+  private ColumnLayout layout;
+  private final AbbreviateStyle abbreviateStyle;
   private final Function<R, V> valueProvider;
   private final Function<V, StyledText> styledTextProvider;
   private final Comparator<V> sorter;
@@ -21,7 +23,9 @@ public class Column<R,V>
   private Column(ColumnBuilder<R,V> builder)
   {
     this.title = new StyledText(builder.title, builder.titleStyle);
-    this.width = builder.width;
+    this.layout = builder.layout;
+    this.width = layout.getPreferredWidth();
+    this.abbreviateStyle = builder.abbreviateStyle;
     this.valueProvider = builder.valueProvider;
     this.styledTextProvider = ensureStyledTextProvider(builder);
     if (builder.sorter == null)
@@ -53,36 +57,106 @@ public class Column<R,V>
   {
     return title.toString();
   }
-
-  void printCell(R row)
+  
+  ColumnLayout getLayout()
   {
+    return layout;
+  }
+  
+  void setWidth(int width)
+  {
+    this.width = width;
+  }
+
+  boolean printCell(R row, int line)
+  {
+    if (line > 0 && abbreviateStyle != AbbreviateStyle.NONE)
+    {
+      term.reset();
+      term.write(fillWithWhitespaces(0));
+      return false;
+    }
     V value = valueProvider.apply(row);
     StyledText text = styledTextProvider.apply(value);
-    text = trimToWidth(text);
-    term.write(text);
+    StyledText lineText = trimToWidthAndLine(text, line);
+    term.write(lineText);
     term.reset();
-    term.write(fillWithWhitespaces(text.length()));
+    term.write(fillWithWhitespaces(lineText.length()));
+    return abbreviateStyle == AbbreviateStyle.NONE && 
+           text.length() > (line+1)*width;
   }
 
   void printTitle()
   {
-    StyledText trimmedTitle = trimToWidth(title);
+    StyledText trimmedTitle = trimmedTitle();
     term.write(trimmedTitle);
     term.reset();
     term.write(fillWithWhitespaces(trimmedTitle.length()));
   }
  
-  private StyledText trimToWidth(StyledText text)
+  private StyledText trimmedTitle()
+  {
+    if (title.length() < width)
+    {
+      return title;
+    }
+    return abbreviateRightWithDots(title);
+  }
+
+  private StyledText trimToWidthAndLine(StyledText text, int line)
   {
     if (text.length() < width)
     {
       return text;
     }
-    StyledText trimmedText = text.abbreviate(width - 4);
-    trimmedText = trimmedText.append("...");
-    return trimmedText;
+    switch(abbreviateStyle)
+    {
+      case NONE:
+        return trimToLine(text, line);
+      case LEFT:
+        return abbreviateLeft(text);
+      case RIGHT:
+        return abbreviateRight(text);
+      case LEFT_WITH_DOTS:
+        return abbreviateLeftWithDots(text);
+      case RIGHT_WITH_DOTS:
+        return abbreviateRightWithDots(text);
+      default:
+        throw new IllegalStateException("Unknown AbbreviateStyle " + abbreviateStyle);
+    }
   }
 
+  private StyledText trimToLine(StyledText text, int line)
+  {
+    StyledText lineText = text.sub(line*width, width);
+    return lineText;
+  }
+
+  private StyledText abbreviateLeft(StyledText text)
+  {
+    StyledText abbreviatedText = text.right(width-1);
+    return abbreviatedText;
+  }
+
+  private StyledText abbreviateRight(StyledText text)
+  {
+    StyledText abbreviatedText = text.left(width-1);
+    return abbreviatedText;
+  }
+
+  private StyledText abbreviateLeftWithDots(StyledText text)
+  {
+    StyledText abbreviatedText = text.right(width-4);    
+    abbreviatedText = abbreviatedText.appendLeft("...");
+    return abbreviatedText;
+  }
+
+  private StyledText abbreviateRightWithDots(StyledText text)
+  {
+    StyledText abbreviatedText = text.left(width - 4);
+    abbreviatedText = abbreviatedText.append("...");
+    return abbreviatedText;
+  }
   private String fillWithWhitespaces(int length)
   {
     StringBuilder builder = new StringBuilder();
@@ -138,21 +212,22 @@ public class Column<R,V>
   public static final class ColumnBuilder<R, V>
   {
     private String title;
-    private int width;
+    private ColumnLayout layout = new ColumnLayout();
     private Style titleStyle;
     private Function<R, V> valueProvider;
     private Function<V, String> textProvider;
     private Function<V, StyledText> styledTextProvider;
     private Comparator<V> sorter;
     private Style cellStyle;
+    private AbbreviateStyle abbreviateStyle = AbbreviateStyle.RIGHT_WITH_DOTS;
 
     public ColumnBuilder(String title, int width, Function<R, V> valueProvider)
     {
       Check.parameter("title").withValue(title).isNotNull();
-      Check.parameter("width").withValue(width).isPositive().isNotZero();
+      Check.parameter("width").withValue(width).isPositive();
       Check.parameter("valueProvider").withValue(valueProvider).isNotNull();
       this.title = title;
-      this.width = width;
+      this.layout.setFixedWith(width);
       this.valueProvider = valueProvider;
     }
     
@@ -197,10 +272,23 @@ public class Column<R,V>
       this.sorter = sorter;
       return this;
     }
+
+    public ColumnBuilder<R, V> multiLine()
+    {
+      withAbbreviateStyle(AbbreviateStyle.NONE);
+      return this;
+    }
     
+    public ColumnBuilder<R, V> withAbbreviateStyle(@SuppressWarnings("hiding") AbbreviateStyle abbreviateStyle)
+    {
+      this.abbreviateStyle = abbreviateStyle;
+      return this;
+    }
+
     public Column<R,V> toColumn()
     {
       return new Column<>(this); 
     }
+
   }
 }

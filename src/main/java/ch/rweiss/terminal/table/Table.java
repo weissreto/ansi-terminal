@@ -34,24 +34,64 @@ public class Table<R>
   {
     rows.add(row);
   }
+  
+  public void clear()
+  {
+    rows.clear();
+  }
 
+  public void printWithoutHeader()
+  {
+    layoutColumns();
+    printRows();
+  }
+  
   public void print()
   {
-    sortRows();
+    layoutColumns();
+    printHeader();
+    printRows();
+  }
+
+  private void layoutColumns()
+  {
+    int maxWidth = term.cursor().maxPosition().column()-1;
+    int minWidth = columns.stream().mapToInt(column -> column.getLayout().getPreferredWidth()).sum();
+    int availableWidth = maxWidth-minWidth;
+    if (availableWidth >= 0)
+    {
+      columns.stream().filter(column -> column.getLayout().getPreferredWidth() == 0).forEach(column -> column.setWidth(availableWidth));
+    }
+  }
+
+  private void printHeader()
+  {
     for (Column<R,?> column : columns)
     {
       column.printTitle();
     }
     term.clear().lineToEnd();
     term.newLine();
+  }
+  
+  private void printRows()
+  {
+    sortRows();
     for (R row : rows)
     {
-      for (Column<R,?> column : columns)
+      int line = 0;
+      boolean needMoreLines;
+      do
       {
-        column.printCell(row);
-      }
-      term.clear().lineToEnd();
-      term.newLine();
+        needMoreLines = false;
+        for (Column<R,?> column : columns)
+        {
+          needMoreLines = needMoreLines | column.printCell(row, line);
+        }
+        term.clear().lineToEnd();
+        term.newLine();
+        line = line + 1;
+      } while (needMoreLines);      
     }
     term.clear().screenToEnd();
   }

@@ -5,14 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-import ch.rweiss.terminal.Color;
-import ch.rweiss.terminal.Style;
-import ch.rweiss.terminal.StyledText;
-
 public class TestStyledText
 {
   private static final Style BLUE = Style.create().withColor(Color.BLUE).toStyle();
   private static final Style RED = Style.create().withColor(Color.RED).toStyle();
+  private static final Style GREEN = Style.create().withColor(Color.GREEN).toStyle();
 
   @Test
   public void nullArg()
@@ -96,52 +93,239 @@ public class TestStyledText
     
     assertThatThrownBy(() -> new StyledText("Hello").append((StyledText)null)).isInstanceOf(IllegalArgumentException.class);
   }
+  
+  @Test
+  public void appendLeft()
+  {
+    StyledText text = new StyledText("");
+    text = text.appendLeft("Hi");
+    assertThat(text.parts()).isNotNull().hasSize(1);
+    assertThat(text.parts().get(0).text()).isEqualTo("Hi");
+    assertThat(text.parts().get(0).style()).isNull();
+    
+    text = new StyledText("World", BLUE);
+    text = text.appendLeft("Hello");
+    assertThat(text.parts()).isNotNull().hasSize(1);
+    assertThat(text.parts().get(0).text()).isEqualTo("HelloWorld");
+    assertThat(text.parts().get(0).style()).isEqualTo(BLUE);
+  }
 
   @Test
-  public void abbreviate()
+  public void left()
   {
     StyledText text = new StyledText("Hello", BLUE).append("World", RED);
     
-    StyledText abbreviate = text.abbreviate(10);
-    assertThat(abbreviate).isSameAs(text);
+    StyledText left = text.left(10);
+    assertThat(left).isSameAs(text);
     
-    abbreviate = text.abbreviate(9);
-    assertThat(abbreviate).isNotSameAs(text);
-    assertThat(abbreviate.length()).isEqualTo(9);
-    assertThat(abbreviate.parts()).isNotNull().hasSize(2);
-    assertThat(abbreviate.parts().get(0).text()).isEqualTo("Hello");
-    assertThat(abbreviate.parts().get(0).style()).isEqualTo(BLUE);
-    assertThat(abbreviate.parts().get(1).text()).isEqualTo("Worl");
-    assertThat(abbreviate.parts().get(1).style()).isEqualTo(RED);
+    left = text.left(9);
+    assertThat(left).isNotSameAs(text);
+    assertThat(left.length()).isEqualTo(9);
+    assertThat(left.parts()).isNotNull().hasSize(2);
+    assertThat(left.parts().get(0).text()).isEqualTo("Hello");
+    assertThat(left.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(left.parts().get(1).text()).isEqualTo("Worl");
+    assertThat(left.parts().get(1).style()).isEqualTo(RED);
 
-    abbreviate = text.abbreviate(6);
-    assertThat(abbreviate.length()).isEqualTo(6);
-    assertThat(abbreviate.parts()).isNotNull().hasSize(2);
-    assertThat(abbreviate.parts().get(0).text()).isEqualTo("Hello");
-    assertThat(abbreviate.parts().get(0).style()).isEqualTo(BLUE);
-    assertThat(abbreviate.parts().get(1).text()).isEqualTo("W");
-    assertThat(abbreviate.parts().get(1).style()).isEqualTo(RED);
+    left = text.left(6);
+    assertThat(left.length()).isEqualTo(6);
+    assertThat(left.parts()).isNotNull().hasSize(2);
+    assertThat(left.parts().get(0).text()).isEqualTo("Hello");
+    assertThat(left.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(left.parts().get(1).text()).isEqualTo("W");
+    assertThat(left.parts().get(1).style()).isEqualTo(RED);
 
     
-    abbreviate = text.abbreviate(5);
-    assertThat(abbreviate.length()).isEqualTo(5);
-    assertThat(abbreviate.parts()).isNotNull().hasSize(1);
-    assertThat(abbreviate.parts().get(0).text()).isEqualTo("Hello");
-    assertThat(abbreviate.parts().get(0).style()).isEqualTo(BLUE);
+    left = text.left(5);
+    assertThat(left.length()).isEqualTo(5);
+    assertThat(left.parts()).isNotNull().hasSize(1);
+    assertThat(left.parts().get(0).text()).isEqualTo("Hello");
+    assertThat(left.parts().get(0).style()).isEqualTo(BLUE);
 
-    abbreviate = text.abbreviate(4);
-    assertThat(abbreviate.length()).isEqualTo(4);
-    assertThat(abbreviate.parts()).isNotNull().hasSize(1);
-    assertThat(abbreviate.parts().get(0).text()).isEqualTo("Hell");
-    assertThat(abbreviate.parts().get(0).style()).isEqualTo(BLUE);
+    left = text.left(4);
+    assertThat(left.length()).isEqualTo(4);
+    assertThat(left.parts()).isNotNull().hasSize(1);
+    assertThat(left.parts().get(0).text()).isEqualTo("Hell");
+    assertThat(left.parts().get(0).style()).isEqualTo(BLUE);
     
-    abbreviate = text.abbreviate(0);
-    assertThat(abbreviate.length()).isEqualTo(0);
-    assertThat(abbreviate.parts()).isNotNull().hasSize(1);
-    assertThat(abbreviate.parts().get(0).text()).isEqualTo("");
-    assertThat(abbreviate.parts().get(0).style()).isEqualTo(BLUE);
+    left = text.left(0);
+    assertThat(left.length()).isEqualTo(0);
+    assertThat(left.parts()).isNotNull().hasSize(1);
+    assertThat(left.parts().get(0).text()).isEqualTo("");
+    assertThat(left.parts().get(0).style()).isEqualTo(BLUE);
     
-    assertThatThrownBy(() -> text.abbreviate(-1)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> text.left(-1)).isInstanceOf(IllegalArgumentException.class);
+  }
+  
+  @Test
+  public void right()
+  {
+    StyledText text = new StyledText("Hello", BLUE).append("World", RED);
+    
+    StyledText right = text.right(10);
+    assertThat(right).isSameAs(text);
+    
+    right = text.right(9);
+    assertThat(right).isNotSameAs(text);
+    assertThat(right.length()).isEqualTo(9);
+    assertThat(right.parts()).isNotNull().hasSize(2);
+    assertThat(right.parts().get(0).text()).isEqualTo("ello");
+    assertThat(right.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(right.parts().get(1).text()).isEqualTo("World");
+    assertThat(right.parts().get(1).style()).isEqualTo(RED);
+
+    right = text.right(6);
+    assertThat(right.length()).isEqualTo(6);
+    assertThat(right.parts()).isNotNull().hasSize(2);
+    assertThat(right.parts().get(0).text()).isEqualTo("o");
+    assertThat(right.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(right.parts().get(1).text()).isEqualTo("World");
+    assertThat(right.parts().get(1).style()).isEqualTo(RED);
+
+    
+    right = text.right(5);
+    assertThat(right.length()).isEqualTo(5);
+    assertThat(right.parts()).isNotNull().hasSize(1);
+    assertThat(right.parts().get(0).text()).isEqualTo("World");
+    assertThat(right.parts().get(0).style()).isEqualTo(RED);
+
+    right = text.right(4);
+    assertThat(right.length()).isEqualTo(4);
+    assertThat(right.parts()).isNotNull().hasSize(1);
+    assertThat(right.parts().get(0).text()).isEqualTo("orld");
+    assertThat(right.parts().get(0).style()).isEqualTo(RED);
+    
+    right = text.right(0);
+    assertThat(right.length()).isEqualTo(0);
+    assertThat(right.parts()).isNotNull().hasSize(1);
+    assertThat(right.parts().get(0).text()).isEqualTo("");
+    assertThat(right.parts().get(0).style()).isEqualTo(RED);
+    
+    assertThatThrownBy(() -> text.right(-1)).isInstanceOf(IllegalArgumentException.class);
   }
 
+  @Test
+  public void sub_ofTwoParts()
+  {
+    StyledText text = new StyledText("Hello", BLUE).append("World", RED);
+    
+    StyledText subtext = text.sub(0, 10);
+    assertThat(subtext).isSameAs(text);
+    
+    subtext = text.sub(0, 9);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(9);
+    assertThat(subtext.parts()).isNotNull().hasSize(2);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("Hello");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(subtext.parts().get(1).text()).isEqualTo("Worl");
+    assertThat(subtext.parts().get(1).style()).isEqualTo(RED);
+    
+    subtext = text.sub(1, 9);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(9);
+    assertThat(subtext.parts()).isNotNull().hasSize(2);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("ello");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(subtext.parts().get(1).text()).isEqualTo("World");
+    assertThat(subtext.parts().get(1).style()).isEqualTo(RED);
+
+    subtext = text.sub(1, 8);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(8);
+    assertThat(subtext.parts()).isNotNull().hasSize(2);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("ello");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(subtext.parts().get(1).text()).isEqualTo("Worl");
+    assertThat(subtext.parts().get(1).style()).isEqualTo(RED);
+
+    subtext = text.sub(3, 4);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(4);
+    assertThat(subtext.parts()).isNotNull().hasSize(2);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("lo");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(subtext.parts().get(1).text()).isEqualTo("Wo");
+    assertThat(subtext.parts().get(1).style()).isEqualTo(RED);
+    
+    subtext = text.sub(0, 4);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(4);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("Hell");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+
+    subtext = text.sub(1, 3);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(3);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("ell");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+
+    subtext = text.sub(5, 4);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(4);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("Worl");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(RED);
+
+    subtext = text.sub(6, 3);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(3);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("orl");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(RED);
+  }
+
+  @Test
+  public void sub_ofThreeParts()
+  {
+    StyledText text = new StyledText("One", BLUE).append("Two", RED).append("Three", GREEN);
+
+    StyledText subtext = text.sub(4, 2);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(2);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("wo");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(RED);
+
+    subtext = text.sub(2, 5);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(5);
+    assertThat(subtext.parts()).isNotNull().hasSize(3);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("e");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    assertThat(subtext.parts().get(1).text()).isEqualTo("Two");
+    assertThat(subtext.parts().get(1).style()).isEqualTo(RED);
+    assertThat(subtext.parts().get(2).text()).isEqualTo("T");
+    assertThat(subtext.parts().get(2).style()).isEqualTo(GREEN);
+    
+    subtext = text.sub(2, 0);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(0);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    
+    subtext = text.sub(0, 0);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(0);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(BLUE);
+    
+    subtext = text.sub(5, 0);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(0);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(RED);
+
+    subtext = text.sub(9, 0);
+    assertThat(subtext).isNotSameAs(text);
+    assertThat(subtext.length()).isEqualTo(0);
+    assertThat(subtext.parts()).isNotNull().hasSize(1);
+    assertThat(subtext.parts().get(0).text()).isEqualTo("");
+    assertThat(subtext.parts().get(0).style()).isEqualTo(GREEN);
+  }
 }
