@@ -55,13 +55,13 @@ public class Table<R>
 
   private void layoutColumns()
   {
-    int maxWidth = term.cursor().maxPosition().column()-1;
-    int minWidth = columns.stream().mapToInt(column -> column.getLayout().getPreferredWidth()).sum();
-    int availableWidth = maxWidth-minWidth;
-    if (availableWidth >= 0)
-    {
-      columns.stream().filter(column -> column.getLayout().getPreferredWidth() == 0).forEach(column -> column.setWidth(availableWidth));
-    }
+    int maxWidth = getMaxAvailableWidth();
+    new Layouter<>(columns).layoutColumns(maxWidth);
+  }
+  
+  private int getMaxAvailableWidth()
+  {
+    return term.cursor().maxPosition().column()-1;
   }
 
   private void printHeader()

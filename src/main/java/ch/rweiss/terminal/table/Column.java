@@ -11,9 +11,10 @@ import ch.rweiss.terminal.StyledText;
 
 public class Column<R,V>
 {
-  private final StyledText title;
   private int width;
-  private ColumnLayout layout;
+  private boolean visible = true;
+  private final StyledText title;
+  private final ColumnLayout layout;
   private final AbbreviateStyle abbreviateStyle;
   private final Function<R, V> valueProvider;
   private final Function<V, StyledText> styledTextProvider;
@@ -24,7 +25,7 @@ public class Column<R,V>
   {
     this.title = new StyledText(builder.title, builder.titleStyle);
     this.layout = builder.layout;
-    this.width = layout.getPreferredWidth();
+    this.width = layout.getMinWidth();
     this.abbreviateStyle = builder.abbreviateStyle;
     this.valueProvider = builder.valueProvider;
     this.styledTextProvider = ensureStyledTextProvider(builder);
@@ -67,9 +68,23 @@ public class Column<R,V>
   {
     this.width = width;
   }
+  
+  void setVisible(boolean visible)
+  {
+    this.visible = visible;
+  }
+  
+  boolean isVisible()
+  {
+    return visible;
+  }
 
   boolean printCell(R row, int line)
   {
+    if (!visible)
+    {
+      return false;
+    }
     if (line > 0 && abbreviateStyle != AbbreviateStyle.NONE)
     {
       term.reset();
@@ -88,6 +103,10 @@ public class Column<R,V>
 
   void printTitle()
   {
+    if (!visible)
+    {
+      return;
+    }
     StyledText trimmedTitle = trimmedTitle();
     term.write(trimmedTitle);
     term.reset();
@@ -212,7 +231,7 @@ public class Column<R,V>
   public static final class ColumnBuilder<R, V>
   {
     private String title;
-    private ColumnLayout layout = new ColumnLayout();
+    private ColumnLayout layout;
     private Style titleStyle;
     private Function<R, V> valueProvider;
     private Function<V, String> textProvider;
@@ -227,7 +246,7 @@ public class Column<R,V>
       Check.parameter("width").withValue(width).isPositive();
       Check.parameter("valueProvider").withValue(valueProvider).isNotNull();
       this.title = title;
-      this.layout.setFixedWith(width);
+      this.layout = new ColumnLayout(width, true);
       this.valueProvider = valueProvider;
     }
     
@@ -279,6 +298,12 @@ public class Column<R,V>
       return this;
     }
     
+    public ColumnBuilder<R, V> expandHorizontal()
+    {
+      this.layout = new ColumnLayout(this.layout.getMinWidth(), false);
+      return this;
+    }
+    
     public ColumnBuilder<R, V> withAbbreviateStyle(@SuppressWarnings("hiding") AbbreviateStyle abbreviateStyle)
     {
       this.abbreviateStyle = abbreviateStyle;
@@ -289,6 +314,5 @@ public class Column<R,V>
     {
       return new Column<>(this); 
     }
-
   }
 }
