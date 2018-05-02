@@ -64,8 +64,14 @@ public class Column<R,V>
     return layout;
   }
   
+  int getWidth()
+  {
+    return width;
+  }
+
   void setWidth(int width)
   {
+    Check.parameter("width").withValue(width).isGreaterOrEqualTo(layout.getMinWidth());
     this.width = width;
   }
   
@@ -246,7 +252,7 @@ public class Column<R,V>
       Check.parameter("width").withValue(width).isPositive();
       Check.parameter("valueProvider").withValue(valueProvider).isNotNull();
       this.title = title;
-      this.layout = new ColumnLayout(width, true);
+      this.layout = new ColumnLayout(width);
       this.valueProvider = valueProvider;
     }
     
@@ -298,9 +304,9 @@ public class Column<R,V>
       return this;
     }
     
-    public ColumnBuilder<R, V> expandHorizontal()
+    public ColumnBuilder<R, V> withMinWidth(int minWidth)
     {
-      this.layout = new ColumnLayout(this.layout.getMinWidth(), false);
+      this.layout = this.layout.setMinWidth(minWidth);
       return this;
     }
     

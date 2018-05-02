@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 class Layouter<R>
 {
+  private static final int ROUND = 50_000;
+  private static final int CONSTANT = ROUND * 2;
   private final List<Column<R, ?>> columns;
 
   public Layouter(List<Column<R, ?>> columns)
@@ -14,17 +16,67 @@ class Layouter<R>
 
   public void layoutColumns(int maxWidth)
   {
-    makeAllColumnsVisible();
-    int currentWidth = hideRightColumnsIfToLessSpace(maxWidth);    
-    expandNonFixedColumnsToGatherAllAvailableSpace(maxWidth-currentWidth);
+    resetColumns();
+    shrinkStrechyColumnsToFitSpace(maxWidth);
+    int currentWidth = hideRightColumnsToFitSpace(maxWidth);    
+    expandStrechyColumnsToGatherAllAvailableSpace(maxWidth-currentWidth);
   }
   
-  private void makeAllColumnsVisible()
+  private void shrinkStrechyColumnsToFitSpace(int maxWidth)
   {
-    columns.forEach(column -> column.setVisible(true));
+    int currentWidth = getCurrentWidthOfVisibleColumns();
+    if (currentWidth <= maxWidth)
+    {
+      return;
+    }
+    int minWidth = getMinWidthOfAllColumns();
+    if (minWidth > maxWidth)
+    {
+      getStrechyColumns().forEach(column -> column.setWidth(column.getLayout().getMinWidth()));
+      return;
+    }
+    int totalShrinkWidth = currentWidth - maxWidth;
+    int deltaWidthWeigthSum = getStrechyColumns().stream().mapToInt(column -> column.getLayout().getDeltaWidth()).sum();
+    int shrinkWidthPerWeight = totalShrinkWidth * CONSTANT / deltaWidthWeigthSum;
+    int mod = totalShrinkWidth - shrinkWidthPerWeight * deltaWidthWeigthSum / CONSTANT;
+    for (Column<?,?> shrinkColumn : getStrechyColumns())
+    {
+      int deltaWidthWeigth = shrinkColumn.getLayout().getDeltaWidth();
+      int preferedWidth = shrinkColumn.getLayout().getPreferedWidth();
+      int shrinkWidth =  (shrinkWidthPerWeight * deltaWidthWeigth + ROUND) / CONSTANT;
+      int newWidth = preferedWidth - shrinkWidth;
+      if (newWidth > shrinkColumn.getLayout().getMinWidth())
+      {
+        if (mod > 0)
+        {
+          newWidth = newWidth - 1;
+          mod = mod - 1;
+        }
+      }
+      shrinkColumn.setWidth(newWidth);
+    }
   }
 
-  private int hideRightColumnsIfToLessSpace(int maxWidth)
+  private int getMinWidthOfAllColumns()
+  {
+    return columns
+        .stream()
+        .mapToInt(column -> column.getLayout().getMinWidth())
+        .sum();
+  }
+
+  private void resetColumns()
+  {
+    columns.forEach(this::resetColumn);
+  }
+  
+  private void resetColumn(Column<R,?> column)
+  {
+    column.setVisible(true);
+    column.setWidth(column.getLayout().getPreferedWidth());
+  }
+
+  private int hideRightColumnsToFitSpace(int maxWidth)
   {
     int currentWidth = getCurrentWidthOfVisibleColumns();
     while (currentWidth > maxWidth)
@@ -39,7 +91,7 @@ class Layouter<R>
   {
     int currentWidth = getVisibleColumns()
         .stream()
-        .mapToInt(column -> column.getLayout().getMinWidth())
+        .mapToInt(column -> column.getWidth())
         .sum();
     return currentWidth;
   }
@@ -58,40 +110,33 @@ class Layouter<R>
         .collect(Collectors.toList());
   }
 
-  private void expandNonFixedColumnsToGatherAllAvailableSpace(int expandWidth)
+  private void expandStrechyColumnsToGatherAllAvailableSpace(int expandWidth)
   {
     if (expandWidth >= 0)
     {
-      int nonFixedColumns = countExpandableColumns();
-      int widthPerColumn = expandWidth / nonFixedColumns;
-      int mod = expandWidth % nonFixedColumns;
-      for (Column<?,?> columnToExpand : getExpandableColumns())
+      int preferedWidthWeightSum = getStrechyColumns().stream().mapToInt(column -> column.getLayout().getPreferedWidth()).sum();
+      int expandWidthPerWeight = expandWidth * CONSTANT / preferedWidthWeightSum;
+      int mod = expandWidth - expandWidthPerWeight * preferedWidthWeightSum / CONSTANT;
+      for (Column<?,?> expandColumn : getStrechyColumns())
       {
-        int modWidth = 0;
+        int preferedWidthWeight = expandColumn.getLayout().getPreferedWidth();
+        int expandColumnWidth = (expandWidthPerWeight * preferedWidthWeight + ROUND) / CONSTANT;
+        int newWidth = expandColumn.getWidth() + expandColumnWidth;
         if (mod > 0)
         {
-          modWidth = 1;
+          newWidth = newWidth + 1;
+          mod = mod - 1;
         }
-        mod = mod - 1;
-        int newWidth = columnToExpand.getLayout().getMinWidth()+widthPerColumn+modWidth;
-        columnToExpand.setWidth(newWidth);
+        expandColumn.setWidth(newWidth);
       }
     }
   }
 
-  private List<Column<?, ?>> getExpandableColumns()
+  private List<Column<?, ?>> getStrechyColumns()
   {
     return columns
         .stream()
-        .filter(column -> !column.getLayout().isFixed())
+        .filter(column -> column.getLayout().isStrechy())
         .collect(Collectors.toList());
-  }
-
-  private int countExpandableColumns()
-  {
-    return (int)columns
-        .stream()
-        .filter(column -> !column.getLayout().isFixed())
-        .count();
   }
 }
