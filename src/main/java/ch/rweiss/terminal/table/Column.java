@@ -169,7 +169,7 @@ public class Column<R,V>
     List<StyledText> lines = new ArrayList<>();
     
     int startPos = 0;
-    do
+    while (startPos < text.length())
     {
       int lineWidth = width;
       int nextStartPos = startPos+lineWidth;
@@ -182,7 +182,11 @@ public class Column<R,V>
       StyledText line = text.sub(startPos, lineWidth);
       lines.add(line);
       startPos = nextStartPos;
-    } while (startPos < text.length());    
+    }    
+    if (lines.isEmpty())
+    {
+      lines.add(new StyledText(""));
+    }
     return lines;
   }
 
