@@ -328,4 +328,23 @@ public class TestStyledText
     assertThat(subtext.parts().get(0).text()).isEqualTo("");
     assertThat(subtext.parts().get(0).style()).isEqualTo(GREEN);
   }
+  
+  @Test
+  public void indexOf()
+  {
+    final StyledText empty = new StyledText("");
+    
+    assertThatThrownBy(() -> empty.indexOf(-1, '\n')).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> empty.indexOf(0, '\n')).isInstanceOf(IllegalArgumentException.class);
+    
+    final StyledText text = new StyledText("One", BLUE).append("Two", RED).append("Three", GREEN);
+  
+    assertThat(text.indexOf(0, 'e')).isEqualTo(2);
+    assertThat(text.indexOf(2, 'e')).isEqualTo(2);
+    assertThat(text.indexOf(3, 'e')).isEqualTo(9);
+    assertThat(text.indexOf(9, 'e')).isEqualTo(9);
+    assertThat(text.indexOf(10, 'e')).isEqualTo(10);
+    
+    assertThatThrownBy(() -> text.indexOf(11, 'e')).isInstanceOf(IllegalArgumentException.class);
+  }
 }

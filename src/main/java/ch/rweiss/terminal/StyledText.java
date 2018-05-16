@@ -134,6 +134,34 @@ public class StyledText
         .mapToInt(part -> part.text.length())
         .sum();
   }
+  
+  public int indexOf(int startPos, char character)
+  {
+    Check.parameter("startPos").withValue(startPos).isPositive().isLessThan(length());
+    for (int pos = startPos; pos < length(); pos++)
+    {
+      if (charAt(pos) == character)
+      {
+        return pos;
+      }
+    }
+    return -1;
+  }
+
+  private char charAt(int pos)
+  {
+    Check.parameter("pos").withValue(pos).isPositive().isLessThan(length());
+    int startPos = 0;
+    for (Part part : parts)
+    {
+      if (pos >= startPos && pos < startPos + part.length())
+      {
+        return part.text().charAt(pos-startPos);
+      }
+      startPos += part.length();
+    }
+    throw new IllegalStateException("There is a bug in the code");
+  }
 
   private Part firstPart()
   {

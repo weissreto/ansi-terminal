@@ -1,6 +1,8 @@
 package ch.rweiss.terminal.table;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -99,12 +101,23 @@ public class Column<R,V>
     }
     V value = valueProvider.apply(row);
     StyledText text = styledTextProvider.apply(value);
-    StyledText lineText = trimToWidthAndLine(text, line);
+    
+    boolean moreLines = false;
+    StyledText lineText = null;
+    if (abbreviateStyle != AbbreviateStyle.NONE)
+    {
+      lineText = trimToWidth(text);
+    }
+    else
+    {
+      List<StyledText> lines = splitLines(text);
+      lineText = lines.get(line);
+      moreLines = line+1 < lines.size();
+    }
     term.write(lineText);
     term.reset();
     term.write(fillWithWhitespaces(lineText.length()));
-    return abbreviateStyle == AbbreviateStyle.NONE && 
-           text.length() > (line+1)*width;
+    return moreLines;
   }
 
   void printTitle()
@@ -128,7 +141,7 @@ public class Column<R,V>
     return abbreviateRightWithDots(title);
   }
 
-  private StyledText trimToWidthAndLine(StyledText text, int line)
+  private StyledText trimToWidth(StyledText text)
   {
     if (text.length() < width)
     {
@@ -137,7 +150,7 @@ public class Column<R,V>
     switch(abbreviateStyle)
     {
       case NONE:
-        return trimToLine(text, line);
+        throw new IllegalStateException("NONE style should be handled outside this method");
       case LEFT:
         return abbreviateLeft(text);
       case RIGHT:
@@ -151,10 +164,26 @@ public class Column<R,V>
     }
   }
 
-  private StyledText trimToLine(StyledText text, int line)
+  private List<StyledText> splitLines(StyledText text)
   {
-    StyledText lineText = text.sub(line*width, width);
-    return lineText;
+    List<StyledText> lines = new ArrayList<>();
+    
+    int startPos = 0;
+    do
+    {
+      int lineWidth = width;
+      int nextStartPos = startPos+lineWidth;
+      int newLinePos = text.indexOf(startPos, '\n');
+      if (newLinePos >= 0 && newLinePos <= startPos+width)
+      {
+        lineWidth = newLinePos - startPos;
+        nextStartPos = startPos + lineWidth + 1;
+      }
+      StyledText line = text.sub(startPos, lineWidth);
+      lines.add(line);
+      startPos = nextStartPos;
+    } while (startPos < text.length());    
+    return lines;
   }
 
   private StyledText abbreviateLeft(StyledText text)
