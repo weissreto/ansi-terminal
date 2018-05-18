@@ -42,27 +42,28 @@ public class Table<R>
     this.rows.addAll(rows);
   }
   
-  public void setSingleRow(R row)
-  {
-    clear();
-    addRow(row);
-  }
-  
   public void clear()
   {
     rows.clear();
   }
-
-  public void printWithoutHeader()
+    
+  public void printSingleRow(R row)
   {
-    layoutColumns();
-    printRows();
+    clear();
+    addRow(row);
+    printWithoutHeader();
   }
   
   public void print()
   {
     layoutColumns();
     printHeader();
+    printRows();
+  }
+
+  public void printWithoutHeader()
+  {
+    layoutColumns();
     printRows();
   }
 
