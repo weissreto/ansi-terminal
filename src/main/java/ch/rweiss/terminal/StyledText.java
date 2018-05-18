@@ -10,6 +10,7 @@ import ch.rweiss.check.Check;
 
 public class StyledText
 {
+  public static final StyledText EMPTY = new StyledText("");
   private final List<Part> parts;
   
   public StyledText(String text)

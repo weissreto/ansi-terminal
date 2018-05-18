@@ -22,6 +22,7 @@ public class Column<R,V>
   private final Function<V, StyledText> styledTextProvider;
   private final Comparator<V> sorter;
   private final AnsiTerminal term = AnsiTerminal.get();
+  private List<StyledText> currentLines;
 
   private Column(ColumnBuilder<R,V> builder)
   {
@@ -87,37 +88,40 @@ public class Column<R,V>
     return visible;
   }
 
-  boolean printCell(R row, int line)
+  boolean printCell(R row, int lineNr)
   {
     if (!visible)
     {
       return false;
     }
-    if (line > 0 && abbreviateStyle != AbbreviateStyle.NONE)
+    
+    Line line = getLine(row, lineNr);
+    term.write(line.text);
+    term.reset();
+    term.write(fillWithWhitespaces(line.text.length()));
+    return line.hasMoreLines;
+  }
+  
+  private Line getLine(R row, int lineNr)
+  {
+    if (lineNr > 0)
     {
-      term.reset();
-      term.write(fillWithWhitespaces(0));
-      return false;
+      if (abbreviateStyle == AbbreviateStyle.NONE)
+      {
+        return new Line(currentLines.get(lineNr), lineNr+1 < currentLines.size());
+      }
+      return new Line(StyledText.EMPTY, false);
     }
+
     V value = valueProvider.apply(row);
     StyledText text = styledTextProvider.apply(value);
-    
-    boolean moreLines = false;
-    StyledText lineText = null;
-    if (abbreviateStyle != AbbreviateStyle.NONE)
+    if (abbreviateStyle == AbbreviateStyle.NONE)
     {
-      lineText = trimToWidth(text);
+      currentLines = splitLines(text);
+      return new Line(currentLines.get(0), currentLines.size() >= 2);
     }
-    else
-    {
-      List<StyledText> lines = splitLines(text);
-      lineText = lines.get(line);
-      moreLines = line+1 < lines.size();
-    }
-    term.write(lineText);
-    term.reset();
-    term.write(fillWithWhitespaces(lineText.length()));
-    return moreLines;
+    StyledText lineText = trimToWidth(text);
+    return new Line(lineText, false);
   }
 
   void printTitle()
@@ -352,6 +356,18 @@ public class Column<R,V>
     public Column<R,V> toColumn()
     {
       return new Column<>(this); 
+    }
+  }
+  
+  private static class Line
+  {
+    private StyledText text;
+    private boolean hasMoreLines;
+    
+    private Line(StyledText text, boolean hasMoreLines)
+    {
+      this.text = text;
+      this.hasMoreLines = hasMoreLines;
     }
   }
 }
