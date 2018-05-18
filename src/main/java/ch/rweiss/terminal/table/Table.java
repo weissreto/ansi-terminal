@@ -1,6 +1,7 @@
 package ch.rweiss.terminal.table;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -33,6 +34,18 @@ public class Table<R>
   public void addRow(R row)
   {
     rows.add(row);
+  }
+  
+  public void setRows(Collection<R> rows)
+  {
+    clear();
+    this.rows.addAll(rows);
+  }
+  
+  public void setSingleRow(R row)
+  {
+    clear();
+    addRow(row);
   }
   
   public void clear()
