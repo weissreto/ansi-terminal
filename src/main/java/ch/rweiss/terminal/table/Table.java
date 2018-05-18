@@ -107,7 +107,6 @@ public class Table<R>
         line = line + 1;
       } while (needMoreLines);      
     }
-    term.clear().screenToEnd();
   }
   
   private void sortRows()
