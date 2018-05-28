@@ -1,25 +1,29 @@
 package ch.rweiss.terminal;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 import com.sun.jna.Platform;
 
 import ch.rweiss.check.Check;
 import ch.rweiss.terminal.graphics.Graphics;
+import ch.rweiss.terminal.internal.SystemTerminal;
+import ch.rweiss.terminal.internal.Terminal;
+import ch.rweiss.terminal.internal.buffer.TerminalBuffer;
 import ch.rweiss.terminal.linux.AnsiTerminalForLinux;
 import ch.rweiss.terminal.windows.AnsiTerminalForWindows;
 
 public class AnsiTerminal 
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
-  private final PrintStream out;
+  private final Terminal systemTerminal = new SystemTerminal();
+  private Terminal terminal = systemTerminal;
   private final FontStyleInline fontStyleInline = new FontStyleInline();
   private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
   private final Graphics graphics = new Graphics(this);
   private final Cursor cursor = new Cursor();
   private final Clear clear = new Clear(this);
+  private final OffScreen offScreen = new OffScreen();
   
   private AnsiTerminal()
   {
@@ -34,7 +38,7 @@ public class AnsiTerminal
       AnsiTerminalForLinux.disableLineAndEchoInput();
     }
       
-    out = System.out;
+    terminal = new SystemTerminal();
   }
 
   public static AnsiTerminal get()
@@ -61,19 +65,19 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
-    out.print(text);
+    terminal.print(text);
     return this;
   }
   
   public AnsiTerminal write(char ch)
   {
-    out.print(ch);
+    terminal.print(ch);
     return this;
   }
   
   public AnsiTerminal write(long value)
   {
-    out.print(value);
+    terminal.print(value);
     return this;
   }
   
@@ -81,13 +85,13 @@ public class AnsiTerminal
   {
     Check.parameter("command").withValue(command).isNotNull();
     
-    out.print(command.escCode());
+    terminal.print(command);
     return this;
   }
   
   public AnsiTerminal newLine()
   {
-    out.println();
+    terminal.println();
     return this;
   }
   
@@ -153,6 +157,11 @@ public class AnsiTerminal
   public Cursor cursor()
   {
     return cursor ;
+  }
+  
+  public OffScreen offScreen()
+  {
+    return offScreen;
   }
     
   public class ForegroundColor
@@ -414,12 +423,12 @@ public class AnsiTerminal
       write(EscCode.csi('n', 6));
       try
       {
-        EscCode result = EscCode.readFrom(System.in);
+        EscCode result = EscCode.readFrom(terminal);
         if (!result.isCsi() || result.csiCommand() != 'R')
         {
           throw new RuntimeException("Could not evaluate position of cursor. Received wrong escape code "+result);
         }
-        return new Position(result.csiArgument(0), result.csiArgument(1));
+        return new Position(result.csiArguments()[0], result.csiArguments()[1]);
       }
       catch (IOException ex)
       {
@@ -530,5 +539,46 @@ public class AnsiTerminal
     {
       return term.write(CLEAR_LINE_TO_END);
     }    
+  }
+
+  public class OffScreen
+  {
+    TerminalBuffer offScreenBuffer;
+
+    public void on()
+    {
+      Position position = cursor().maxPosition();
+      on(new TerminalBuffer(position.line(), position.column()));
+    }
+
+    void on(TerminalBuffer buffer)
+    {
+      offScreenBuffer = buffer;
+      terminal = offScreenBuffer;
+    }
+
+    public void syncToScreen()
+    {
+      if (offScreenBuffer == null)
+      {
+        return;
+      }
+      Terminal current = terminal;
+      terminal = systemTerminal;
+      try
+      {
+        offScreenBuffer.writeTo(AnsiTerminal.this);
+      }
+      finally
+      {
+        terminal = current;
+      }
+    }
+
+    public void off()
+    {
+      offScreenBuffer = null;
+      terminal = systemTerminal;
+    }
   }
 }

@@ -1,5 +1,7 @@
 package ch.rweiss.terminal;
 
+import java.util.Objects;
+
 import ch.rweiss.check.Check;
 
 /**
@@ -38,5 +40,30 @@ public class Position
   {
     return "Position[line="+line+", column="+column+"]";
   }
-
+  
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == this)
+    {
+      return true;
+    }
+    if (obj == null)
+    {
+      return false;
+    }
+    if (obj.getClass() != Position.class)
+    {
+      return false;
+    }
+    Position other = (Position)obj;
+    return Objects.equals(line, other.line) &&
+           Objects.equals(column, other.column);
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return Objects.hash(line, column);
+  }
 }

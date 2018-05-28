@@ -1,9 +1,11 @@
 package ch.rweiss.terminal;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Objects;
 
 import ch.rweiss.check.Check;
+import ch.rweiss.terminal.internal.Terminal;
 
 public class EscCode
 {
@@ -54,7 +56,7 @@ public class EscCode
     return csi(SGR_COMMAND, arguments);
   }
 
-  String escCode()
+  public String escCode()
   {
     return escCode;
   }
@@ -82,13 +84,18 @@ public class EscCode
     return builder.toString();
   }
   
-  boolean isCsi()
+  public boolean isCsi()
   {
     // ESCACPE + CSI_START_TOKEN + COMMAND  = 3 characters at least for a csi escape sequence
     return escCode.length() >= 3 && escCode.charAt(1) == CSI_START_TOKEN; 
   }
+  
+  public boolean isSgr()
+  {
+    return isCsi() && csiCommand() == SGR_COMMAND;
+  }
 
-  char csiCommand()
+  public char csiCommand()
   {
     if (!isCsi())
     {
@@ -97,7 +104,7 @@ public class EscCode
     return escCode.charAt(escCode.length()-1);
   }
   
-  int csiArgument(int index)
+  public int[] csiArguments()
   {
     if (!isCsi())
     {
@@ -105,17 +112,42 @@ public class EscCode
     }
     String argumentStr = escCode.substring(2, escCode.length()-1);
     String[] arguments = argumentStr.split(""+CSI_PARAMETER_DELIMITER);
-    Check.parameter("index").withValue(index).isPositive().isLessThan(arguments.length);
-    return Integer.parseInt(arguments[index]);
+    
+    return Arrays.asList(arguments).stream().mapToInt(Integer::parseInt).toArray();    
   }
-
-  public static EscCode readFrom(InputStream in) throws IOException
+  
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == this)
+    {
+      return true;
+    }
+    if (obj == null)
+    {
+      return false;
+    }
+    if (obj.getClass() != EscCode.class)
+    {
+      return false;
+    }
+    EscCode other = (EscCode)obj;
+    return Objects.equals(this.escCode, other.escCode);
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return escCode.hashCode();
+  }
+  
+  public static EscCode readFrom(Terminal terminal) throws IOException
   {
     StringBuilder builder = new StringBuilder();
     int ch;
     do
     {
-      ch = in.read();
+      ch = terminal.read();
       if (ch == EscCode.ESCAPE)
       {
         builder.append((char)ch);

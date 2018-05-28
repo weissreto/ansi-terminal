@@ -2,6 +2,7 @@ package ch.rweiss.terminal;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import ch.rweiss.check.Check;
 
@@ -45,7 +46,33 @@ public class Color
     rangeCheck(green, "green");
     rangeCheck(blue, "blue");
   }
-
+  
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == this)
+    {
+      return true;
+    }
+    if (obj == null)
+    {
+      return false;
+    }
+    if (obj.getClass() != Color.class)
+    {
+      return false;
+    }
+    Color other = (Color)obj;
+    return Objects.equals(foreground, other.foreground) && 
+           Objects.equals(background,  other.background);
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return foreground.hashCode();
+  }
+  
   private static void rangeCheck(int value, String parameter)
   {
     Check.parameter(parameter).withValue(value).isInRange(0, 255);
@@ -60,4 +87,55 @@ public class Color
   {
     return background;
   }
+
+  public static Color standardColor(int colorId)
+  {
+    switch(colorId)
+    {
+      case 0:
+        return Color.BLACK;
+      case 1:
+        return Color.RED;
+      case 2:
+        return Color.GREEN;
+      case 3:
+        return Color.YELLOW;
+      case 4:
+        return Color.BLUE;
+      case 5:
+        return Color.MAGENTA;
+      case 6:
+        return Color.CYAN;
+      case 7:
+        return Color.WHITE;
+      default:
+        throw new IllegalArgumentException("Color "+colorId+" is not a standard color id");
+    }
+  }
+  
+  public static Color brightStandardColor(int colorId)
+  {
+    switch(colorId)
+    {
+      case 0:
+        return Color.BRIGHT_BLACK;
+      case 1:
+        return Color.BRIGHT_RED;
+      case 2:
+        return Color.BRIGHT_GREEN;
+      case 3:
+        return Color.BRIGHT_YELLOW;
+      case 4:
+        return Color.BRIGHT_BLUE;
+      case 5:
+        return Color.BRIGHT_MAGENTA;
+      case 6:
+        return Color.BRIGHT_CYAN;
+      case 7:
+        return Color.BRIGHT_WHITE;
+      default:
+        throw new IllegalArgumentException("Color "+colorId+" is not a bright standard color id");
+    }
+  }
+
 }
