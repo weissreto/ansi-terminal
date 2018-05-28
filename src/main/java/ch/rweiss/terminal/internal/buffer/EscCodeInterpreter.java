@@ -41,11 +41,8 @@ class EscCodeInterpreter
         reset();
         break;
       case 1:
-        if (arguments.length == 1)
-        {
-          bold();
-        }
-        else
+        bold();
+        if (arguments.length > 1)
         {
           color(arguments);
         }

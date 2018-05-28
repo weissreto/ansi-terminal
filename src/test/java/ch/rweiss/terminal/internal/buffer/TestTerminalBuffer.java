@@ -438,13 +438,21 @@ public class TestTerminalBuffer
       .color().brightYellow()
       .write(8);
     assertColorAt(1,1).isEqualTo(Color.BRIGHT_BLACK);
+    assertFontStyleAt(1,1).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,2).isEqualTo(Color.BRIGHT_WHITE);
+    assertFontStyleAt(1,2).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,3).isEqualTo(Color.BRIGHT_BLUE);
+    assertFontStyleAt(1,3).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,4).isEqualTo(Color.BRIGHT_CYAN);
+    assertFontStyleAt(1,4).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,5).isEqualTo(Color.BRIGHT_GREEN);
+    assertFontStyleAt(1,5).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,6).isEqualTo(Color.BRIGHT_MAGENTA);
+    assertFontStyleAt(1,6).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,7).isEqualTo(Color.BRIGHT_RED);
+    assertFontStyleAt(1,7).isEqualTo(FontStyle.BOLD);
     assertColorAt(1,8).isEqualTo(Color.BRIGHT_YELLOW);
+    assertFontStyleAt(1,8).isEqualTo(FontStyle.BOLD);
   }
 
   @Test

@@ -81,15 +81,17 @@ public class TerminalBuffer implements Terminal
   
   public void writeTo(AnsiTerminal ansiTerminal)
   {
-    ansiTerminal.clear().screen();
     ansiTerminal.cursor().position(1, 1);
-    for (int line = 1; line < lines; line++)
+    for (int line = 1; line <= lines; line++)
     {
-      for (int column = 1; column < columns; column++)
+      if (line > 1)
+      {
+        ansiTerminal.newLine();
+      }
+      for (int column = 1; column <= columns; column++)
       {
         getCharacter(line, column).writeTo(ansiTerminal);
       }
-      ansiTerminal.newLine();
     }
   }
 
@@ -127,9 +129,9 @@ public class TerminalBuffer implements Terminal
     backgroundColor = bgColor;
   }
 
-  void font(FontStyle fontStyle)
+  void font(FontStyle style)
   {
-    this.fontStyle = fontStyle;
+    this.fontStyle = style;
   }
 
   void showCursor(boolean visible)
