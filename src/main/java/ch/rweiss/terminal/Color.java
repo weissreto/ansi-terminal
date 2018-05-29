@@ -20,14 +20,14 @@ public class Color
   public static final Color CYAN = new Color(EscCode.sgr(36), EscCode.sgr(46));
   public static final Color WHITE = new Color(EscCode.sgr(37), EscCode.sgr(47));
 
-  public static final Color BRIGHT_BLACK = new Color(EscCode.sgr(1, 30), EscCode.sgr(100));
-  public static final Color BRIGHT_RED = new Color(EscCode.sgr(1, 31), EscCode.sgr(101));
-  public static final Color BRIGHT_GREEN = new Color(EscCode.sgr(1, 32), EscCode.sgr(102));
-  public static final Color BRIGHT_YELLOW = new Color(EscCode.sgr(1, 33), EscCode.sgr(103));
-  public static final Color BRIGHT_BLUE = new Color(EscCode.sgr(1, 34), EscCode.sgr(104));
-  public static final Color BRIGHT_MAGENTA = new Color(EscCode.sgr(1, 35), EscCode.sgr(105));
-  public static final Color BRIGHT_CYAN = new Color(EscCode.sgr(1, 36), EscCode.sgr(106));
-  public static final Color BRIGHT_WHITE = new Color(EscCode.sgr(1, 37), EscCode.sgr(107));
+  public static final Color BRIGHT_BLACK = new Color(EscCode.sgr(90), EscCode.sgr(100));
+  public static final Color BRIGHT_RED = new Color(EscCode.sgr(91), EscCode.sgr(101));
+  public static final Color BRIGHT_GREEN = new Color(EscCode.sgr(92), EscCode.sgr(102));
+  public static final Color BRIGHT_YELLOW = new Color(EscCode.sgr(93), EscCode.sgr(103));
+  public static final Color BRIGHT_BLUE = new Color(EscCode.sgr(94), EscCode.sgr(104));
+  public static final Color BRIGHT_MAGENTA = new Color(EscCode.sgr(95), EscCode.sgr(105));
+  public static final Color BRIGHT_CYAN = new Color(EscCode.sgr(96), EscCode.sgr(106));
+  public static final Color BRIGHT_WHITE = new Color(EscCode.sgr(97), EscCode.sgr(107));
   
   public static final List<Color> STANDARD_COLORS = Arrays.asList(BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE); 
   public static final List<Color> BRIGHT_STANDARD_COLORS = Arrays.asList(BRIGHT_BLACK, BRIGHT_RED, BRIGHT_GREEN, BRIGHT_YELLOW, BRIGHT_BLUE, BRIGHT_MAGENTA, BRIGHT_CYAN, BRIGHT_WHITE); 

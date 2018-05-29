@@ -42,10 +42,6 @@ class EscCodeInterpreter
         break;
       case 1:
         bold();
-        if (arguments.length > 1)
-        {
-          color(arguments);
-        }
         break;
       case 4:
         underline();
@@ -84,7 +80,7 @@ class EscCodeInterpreter
   private void color(int[] arguments)
   {
     int sgr = arguments[0];
-    if (sgr <= 38)
+    if (sgr <= 38 || (sgr >= 90 && sgr <= 97))
     {
       foregroundColor(arguments);
     }
@@ -126,13 +122,13 @@ class EscCodeInterpreter
     {
       foregroundColor = Color.standardColor(sgr-30);
     }
+    else if (sgr >= 90 && sgr <= 97)
+    {
+      foregroundColor = Color.brightStandardColor(sgr-90);
+    }
     else if (sgr == 38 && arguments.length == 5 && arguments[1] == 2)
     {
       foregroundColor = new Color(arguments[2], arguments[3], arguments[4]);
-    }
-    else if (sgr == 1 && arguments.length == 2)
-    {
-      foregroundColor = Color.brightStandardColor(arguments[1]-30);
     }
     if (foregroundColor == null)
     {
