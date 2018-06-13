@@ -56,16 +56,30 @@ public class Table<R>
   
   public void print()
   {
-    layoutColumns();
-    printHeader();
-    printRows();
+    print(-1);
   }
 
   public void printWithoutHeader()
   {
     layoutColumns();
-    printRows();
+    printRows(-1);
   }
+  
+  public void printTop()
+  {
+    int lines = term.cursor().maxPosition().line() - 
+                term.cursor().position().line() -  
+                1; // header line
+    print(lines);
+  }
+
+  public void print(int lines)
+  {
+    layoutColumns();
+    printHeader();
+    printRows(lines);
+  }
+
 
   private void layoutColumns()
   {
@@ -88,9 +102,10 @@ public class Table<R>
     term.newLine();
   }
   
-  private void printRows()
+  private void printRows(int maxLines)
   {
     sortRows();
+    int printedLines = 0;
     for (R row : rows)
     {
       int line = 0;
@@ -103,8 +118,13 @@ public class Table<R>
           needMoreLines = needMoreLines | column.printCell(row, line);
         }
         term.clear().lineToEnd();
-        term.newLine();
         line = line + 1;
+        printedLines = printedLines + 1;
+        if (maxLines >= 0 && printedLines >= maxLines)
+        {
+          return;
+        }
+        term.newLine();
       } while (needMoreLines);      
     }
   }
