@@ -2,19 +2,20 @@ package ch.rweiss.terminal;
 
 public class MoveCursorExample
 {
-  public static void simple()
+  public static void main(String[] args)
   {
     AnsiTerminal terminal = AnsiTerminal.get();
     terminal
-      .cursor().up(5)
+      .cursor().down(5)
       .write("H")
-      .cursor().down()
+      .cursor().up()
       .write("e")
-      .cursor().down()
+      .cursor().up()
       .write("l")
-      .cursor().down()
+      .cursor().up()
       .write("l")
-      .cursor().down()
-      .write("o");
+      .cursor().up()
+      .write("o")
+      .cursor().down(5);
   }
 }

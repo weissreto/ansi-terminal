@@ -18,6 +18,8 @@ AnsiTerminal terminal = AnsiTerminal.get();
 terminal.color().red().write("This text is red").newLine();
 ```
 
+![Foreground Color](doc/ForegroundColor.png)
+
 ## Change text background color
 
 ```java
@@ -25,22 +27,27 @@ AnsiTerminal terminal = AnsiTerminal.get();
 terminal.backgroundColor().red().write("This text has a red background").newLine();   
 ```
 
+![Background Color](doc/BackgroundColor.png)
+
 ## Move the cursor
 
 ```java
 AnsiTerminal terminal = AnsiTerminal.get();
 terminal
-  .cursor().up(5)
+  .cursor().down(5)
   .write("H")
-  .cursor().down()
+  .cursor().up()
   .write("e")
-  .cursor().down()
+  .cursor().up()
   .write("l")
-  .cursor().down()
+  .cursor().up()
   .write("l")
-  .cursor().down()
-  .write("o");
+  .cursor().up()
+  .write("o")
+  .cursor().down(5);
 ```
+
+![Move Cursor](doc/MoveCursor.png)
 
 ## Clear the screen
 
@@ -49,6 +56,8 @@ AnsiTerminal terminal = AnsiTerminal.get();
 terminal.clear().screen();
 terminal.write("This is an empty screen!");
 ```
+
+![Clear](doc/Clear.png)
 
 ## Evaluate the terminal window size
 
@@ -60,6 +69,8 @@ terminal
     .cursor().position(maxScreenPosition.line()/2, (maxScreenPosition.column()-text.length())/2)
     .write(text);
 ```
+
+![Position](doc/Position.png)
 
 ## Print information in columns that are dynamically adjusted (layouted) to the terminal window size
 
@@ -73,6 +84,8 @@ table.setRows(Arrays.asList(Locale.getAvailableLocales()));
 
 table.print();
 ```
+
+![Table](doc/Table.png)
 
 ## Print to off screen buffer
 
@@ -99,7 +112,9 @@ AnsiTerminal terminal = AnsiTerminal.get();
 terminal.clear().screen();
 Position position = terminal.cursor().maxPosition();
 
-Rectangle rectangle = new Rectangle(Point.ORIGIN, position.column(), position.line());    
+Rectangle rectangle = new Rectangle(Point.ORIGIN, position.column()-1, position.line()-1);    
 terminal.graphics().drawRectangle(rectangle);
 ```
+
+![Graphics](doc/Graphics.png)
 

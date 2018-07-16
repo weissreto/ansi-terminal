@@ -5,7 +5,7 @@ import java.util.Locale;
 
 public class TableExample
 {
-  public static void simple()
+  public static void main(String[] args)
   {
     Table<Locale> table = new Table<>();
     table.addColumn(table.createColumn("Locale", 40).withMinWidth(10).withTextProvider(Locale::toString).toColumn());

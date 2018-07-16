@@ -2,7 +2,7 @@ package ch.rweiss.terminal;
 
 public class ClearExample
 {
-  public static void simple()
+  public static void main(String[] args)
   {
     AnsiTerminal terminal = AnsiTerminal.get();
     terminal.clear().screen();
