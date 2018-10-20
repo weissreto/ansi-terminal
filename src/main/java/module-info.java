@@ -5,6 +5,6 @@ module ch.rweiss.terminal
   exports ch.rweiss.terminal.table;
   exports ch.rweiss.terminal.widget;
   
-  requires ch.rweiss.terminal.nativ;
+  requires transitive ch.rweiss.terminal.nativ;
   requires ch.rweiss.check;
 }
