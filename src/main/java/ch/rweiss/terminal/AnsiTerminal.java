@@ -2,15 +2,13 @@ package ch.rweiss.terminal;
 
 import java.io.IOException;
 
-import com.sun.jna.Platform;
-
 import ch.rweiss.check.Check;
 import ch.rweiss.terminal.graphics.Graphics;
 import ch.rweiss.terminal.internal.SystemTerminal;
 import ch.rweiss.terminal.internal.Terminal;
 import ch.rweiss.terminal.internal.buffer.TerminalBuffer;
-import ch.rweiss.terminal.linux.AnsiTerminalForLinux;
-import ch.rweiss.terminal.windows.AnsiTerminalForWindows;
+import ch.rweiss.terminal.nativ.NativeTerminal;
+import ch.rweiss.terminal.nativ.NativeTerminalException;
 
 public class AnsiTerminal 
 {
@@ -27,17 +25,14 @@ public class AnsiTerminal
   
   private AnsiTerminal()
   {
-    if (Platform.isWindows())
+    try
     {
-      AnsiTerminalForWindows.enableVirtualTerminalProcessing();
-      AnsiTerminalForWindows.disableLineAndEchoInput();
-      AnsiTerminalForWindows.changeToUtf8CodePage();
+      NativeTerminal.enableAnsi();
     }
-    else if (Platform.isLinux())
+    catch(NativeTerminalException ex)
     {
-      AnsiTerminalForLinux.disableLineAndEchoInput();
+      throw new RuntimeException(AnsiTerminal.class.getSimpleName()+" not supported on this platform", ex);
     }
-      
     terminal = new SystemTerminal();
   }
 
