@@ -35,10 +35,36 @@ public class Style
     return new StyleBuilder();
   }
   
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this==obj)
+    {
+      return true;
+    }
+    if (obj == null)
+    {
+      return false;
+    }
+    if (obj.getClass() != Style.class)
+    {
+      return false;
+    }
+    Style other = (Style)obj;
+    return escCodes.equals(other.escCodes);     
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return escCodes.hashCode();
+  }
+  
   List<EscCode> style()
   {
     return escCodes;
   }
+  
   
   public static final class StyleBuilder
   {

@@ -1,7 +1,5 @@
 package ch.rweiss.terminal.internal.buffer;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 
 import ch.rweiss.terminal.AnsiTerminal;
@@ -9,23 +7,24 @@ import ch.rweiss.terminal.Color;
 import ch.rweiss.terminal.EscCode;
 import ch.rweiss.terminal.FontStyle;
 import ch.rweiss.terminal.Position;
+import ch.rweiss.terminal.internal.InputReader;
 import ch.rweiss.terminal.internal.Terminal;
 
 public class TerminalBuffer implements Terminal
 {
   private TerminalCharacter[][] buffer;
   private Position cursorPosition = new Position(1,1);
-  private boolean showCursor = true;
   private Color color = null;
   private Color backgroundColor = null;
   private FontStyle fontStyle = null;
   private EscCodeInterpreter escCodeInterpreter = new EscCodeInterpreter(this);
   private int lines;
   private int columns;
-  private StringReader result;
+  private InputReader input;
   
-  public TerminalBuffer(int lines, int columns)
+  public TerminalBuffer(InputReader input, int lines, int columns)
   {
+    this.input = input;
     this.lines = lines;
     this.columns = columns;
     buffer = new TerminalCharacter[lines][];
@@ -72,13 +71,7 @@ public class TerminalBuffer implements Terminal
   {
     escCodeInterpreter.interpret(command);
   }
-  
-  @Override
-  public int read() throws IOException
-  {    
-    return result.read();
-  }
-  
+    
   public void writeTo(AnsiTerminal ansiTerminal)
   {
     ansiTerminal.cursor().position(1, 1);
@@ -134,9 +127,9 @@ public class TerminalBuffer implements Terminal
     this.fontStyle = style;
   }
 
-  void showCursor(boolean visible)
+  void showCursor(@SuppressWarnings("unused") boolean visible)
   {
-    this.showCursor = visible;
+    // not implemented
   }
 
   private void moveCursorForward()
@@ -278,6 +271,6 @@ public class TerminalBuffer implements Terminal
   void writePosition()
   {
     EscCode position = EscCode.csi('R', cursorPosition.line(), cursorPosition.column());
-    result = new StringReader(position.escCode());
+    input.addPosition(position);
   }
 }

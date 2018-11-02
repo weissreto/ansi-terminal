@@ -1,7 +1,5 @@
 package ch.rweiss.terminal.internal;
 
-import java.io.IOException;
-
 import ch.rweiss.terminal.EscCode;
 
 public interface Terminal
@@ -11,5 +9,4 @@ public interface Terminal
   void print(long value);
   void println();
   void print(EscCode command);
-  int read() throws IOException;
 }

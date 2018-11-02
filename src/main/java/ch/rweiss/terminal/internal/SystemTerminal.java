@@ -1,7 +1,5 @@
 package ch.rweiss.terminal.internal;
 
-import java.io.IOException;
-
 import ch.rweiss.terminal.EscCode;
 
 public class SystemTerminal implements Terminal
@@ -35,11 +33,4 @@ public class SystemTerminal implements Terminal
   {
     System.out.print(command.escCode());
   }
-
-  @Override
-  public int read() throws IOException
-  {
-    return System.in.read();
-  }
-
 }

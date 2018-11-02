@@ -1,9 +1,10 @@
 package ch.rweiss.terminal;
 
-import java.io.IOException;
+import java.util.Optional;
 
 import ch.rweiss.check.Check;
 import ch.rweiss.terminal.graphics.Graphics;
+import ch.rweiss.terminal.internal.InputReader;
 import ch.rweiss.terminal.internal.SystemTerminal;
 import ch.rweiss.terminal.internal.Terminal;
 import ch.rweiss.terminal.internal.buffer.TerminalBuffer;
@@ -15,6 +16,7 @@ public class AnsiTerminal
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
   private final Terminal systemTerminal = new SystemTerminal();
   private Terminal terminal = systemTerminal;
+  final InputReader reader = new InputReader();
   private final FontStyleInline fontStyleInline = new FontStyleInline();
   private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
@@ -22,6 +24,7 @@ public class AnsiTerminal
   private final Cursor cursor = new Cursor();
   private final Clear clear = new Clear(this);
   private final OffScreen offScreen = new OffScreen();
+  private final Input input = new Input();
   
   private AnsiTerminal()
   {
@@ -31,9 +34,11 @@ public class AnsiTerminal
     }
     catch(NativeTerminalException ex)
     {
-      throw new RuntimeException(AnsiTerminal.class.getSimpleName()+" not supported on this platform", ex);
+      System.err.println(AnsiTerminal.class.getSimpleName()+" not supported on this platform!");
+      System.err.println("Error Details: "+ex.getMessage());
     }
     terminal = new SystemTerminal();
+    reader.start();
   }
 
   public static AnsiTerminal get()
@@ -157,6 +162,11 @@ public class AnsiTerminal
   public OffScreen offScreen()
   {
     return offScreen;
+  }
+  
+  public Input input()
+  {
+    return input; 
   }
     
   public class ForegroundColor
@@ -415,20 +425,10 @@ public class AnsiTerminal
     
     public Position position()
     {
+      reader.resetPositions();
       write(EscCode.csi('n', 6));
-      try
-      {
-        EscCode result = EscCode.readFrom(terminal);
-        if (!result.isCsi() || result.csiCommand() != 'R')
-        {
-          throw new RuntimeException("Could not evaluate position of cursor. Received wrong escape code "+result);
-        }
-        return new Position(result.csiArguments()[0], result.csiArguments()[1]);
-      }
-      catch (IOException ex)
-      {
-        throw new RuntimeException("Could not evaluate position of cursor", ex);
-      }
+      Position position = reader.waitForPosition();
+      return position;
     }
     
     public Position maxPosition()
@@ -543,7 +543,7 @@ public class AnsiTerminal
     public void on()
     {
       Position position = cursor().maxPosition();
-      on(new TerminalBuffer(position.line(), position.column()));
+      on(new TerminalBuffer(reader, position.line(), position.column()));
     }
 
     void on(TerminalBuffer buffer)
@@ -574,6 +574,19 @@ public class AnsiTerminal
     {
       offScreenBuffer = null;
       terminal = systemTerminal;
+    }
+  }
+  
+  public class Input
+  {
+    public Optional<Key> readKey()
+    {
+      return reader.readKey();
+    }
+
+    public Key waitForKey()
+    {
+      return reader.waitForKey();
     }
   }
 }

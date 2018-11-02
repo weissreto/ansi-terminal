@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import ch.rweiss.check.Check;
 
@@ -178,7 +179,41 @@ public class StyledText
   {
     return parts;
   }
-
+  
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj)
+    {
+      return true;
+    }
+    if (obj == null)
+    {
+      return false;
+    }
+    if (obj.getClass() != StyledText.class)
+    {
+      return false;
+    }
+    StyledText other = (StyledText) obj;
+    return parts.equals(other.parts);
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return parts.hashCode();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return parts
+        .stream()
+        .map(part -> part.toString())
+        .collect(Collectors.joining());
+  }
+  
   static final class Part
   {
     private final String text;
@@ -223,6 +258,32 @@ public class StyledText
     public String toString()
     {
       return text;
+    }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (this == obj)
+      {
+        return true;
+      }
+      if (obj == null)
+      {
+        return false;
+      }
+      if (obj.getClass() != Part.class)
+      {
+        return false;
+      }
+      Part other = (Part) obj;
+      return Objects.equals(text, other.text) &&
+             Objects.equals(style, other.style);
+    }
+    
+    @Override
+    public int hashCode()
+    {
+      return Objects.hash(text, style);
     }
   }
 }

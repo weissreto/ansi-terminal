@@ -12,6 +12,7 @@ REM SET MAIN_CLASS=ch.rweiss.terminal.ManualTestLine2
 REM SET MAIN_CLASS=ch.rweiss.terminal.ManualTestRectangle
 REM SET MAIN_CLASS=ch.rweiss.terminal.ManualTestStyles
 REM SET MAIN_CLASS=ch.rweiss.terminal.ManualTestText
-SET MAIN_CLASS=ch.rweiss.terminal.ManualTestOffScreen
+REM SET MAIN_CLASS=ch.rweiss.terminal.ManualTestOffScreen
+SET MAIN_CLASS=ch.rweiss.terminal.ManualTestInput
 
 %MAVEN% exec:java -Dexec.mainClass=%MAIN_CLASS% -Dexec.arguments="%*" -Dexec.classpathScope=test

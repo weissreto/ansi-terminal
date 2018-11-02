@@ -1,18 +1,18 @@
 package ch.rweiss.terminal;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
 import ch.rweiss.check.Check;
-import ch.rweiss.terminal.internal.Terminal;
+import ch.rweiss.terminal.internal.EscCodeParser;
 
 public class EscCode
 {
-  private static final char ESCAPE = '\033';
-  private static final char CSI_START_TOKEN = '[';
-  private static final char CSI_PARAMETER_DELIMITER = ';';
+  private static final char ESCAPE = EscCodeParser.ESCAPE;
+  private static final char CSI_START_TOKEN = EscCodeParser.CSI_START_TOKEN;
+  private static final char CSI_PARAMETER_DELIMITER = EscCodeParser.CSI_PARAMETER_DELIMITER;
   private static final char SGR_COMMAND = 'm';
+  private static final int[] EMPTY_ARGUMENTS = new int[0];
   
   private final String escCode;
   
@@ -111,8 +111,11 @@ public class EscCode
       throw new IllegalStateException(escCode+" is not a csi escape code");
     }
     String argumentStr = escCode.substring(2, escCode.length()-1);
+    if (argumentStr.isEmpty())
+    {
+      return EMPTY_ARGUMENTS;
+    }
     String[] arguments = argumentStr.split(""+CSI_PARAMETER_DELIMITER);
-    
     return Arrays.asList(arguments).stream().mapToInt(Integer::parseInt).toArray();    
   }
   
@@ -140,23 +143,5 @@ public class EscCode
   {
     return escCode.hashCode();
   }
-  
-  public static EscCode readFrom(Terminal terminal) throws IOException
-  {
-    StringBuilder builder = new StringBuilder();
-    int ch;
-    do
-    {
-      ch = terminal.read();
-      if (ch == EscCode.ESCAPE)
-      {
-        builder.append((char)ch);
-      }
-      else if (builder.length()>0)
-      {
-        builder.append((char)ch);
-      }
-    } while (builder.length()==0 || ch != 'R');
-    return new EscCode(builder.toString());
-  }
+
 }
