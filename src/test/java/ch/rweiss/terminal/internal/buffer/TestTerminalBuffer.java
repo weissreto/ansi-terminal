@@ -14,8 +14,8 @@ import ch.rweiss.terminal.Position;
 
 public class TestTerminalBuffer
 {
-  private TerminalBuffer testee = new TerminalBuffer(5, 10);
   private AnsiTerminal terminal = AnsiTerminal.get();
+  private TerminalBuffer testee = new TerminalBuffer(Helper.getInputReaderOf(terminal), 5, 10);
 
   @BeforeEach
   public void before()
@@ -661,5 +661,4 @@ public class TestTerminalBuffer
       }
     }
   }
-
 }

@@ -344,7 +344,62 @@ public class TestStyledText
     assertThat(text.indexOf(3, 'e')).isEqualTo(9);
     assertThat(text.indexOf(9, 'e')).isEqualTo(9);
     assertThat(text.indexOf(10, 'e')).isEqualTo(10);
+    assertThat(text.indexOf(0, 'y')).isEqualTo(-1);
     
     assertThatThrownBy(() -> text.indexOf(11, 'e')).isInstanceOf(IllegalArgumentException.class);
+  }
+  
+  @Test
+  public void equals()
+  {
+    StyledText hi = new StyledText("hi");
+    assertThat(hi)
+        .isEqualTo(hi)
+        .isEqualTo(new StyledText("hi"))
+        .isNotEqualTo(new StyledText("world"))
+        .isNotEqualTo(FontStyle.BOLD)
+        .isNotEqualTo(null);
+    
+    StyledText complex = new StyledText("One", BLUE).append("Two", RED).append("Three", GREEN);
+    assertThat(complex)
+        .isEqualTo(complex)
+        .isEqualTo(   new StyledText("One", BLUE).append("Two", RED ).append("Three", GREEN))
+        .isNotEqualTo(new StyledText("One", RED ).append("Two", RED ).append("Three", GREEN))
+        .isNotEqualTo(new StyledText("On",  BLUE).append("Two", RED ).append("Three", GREEN))
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", BLUE).append("Three", GREEN))
+        .isNotEqualTo(new StyledText("One", BLUE).append("Tw",  RED ).append("Three", GREEN))
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", RED ).append("Thre",  GREEN))
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", RED ).append("Three", RED  ));
+  }
+  
+  @Test
+  public void _hashCode()
+  {
+    StyledText hi = new StyledText("hi");
+    assertThat(hi.hashCode())
+        .isEqualTo(hi.hashCode())
+        .isEqualTo(new StyledText("hi").hashCode())
+        .isNotEqualTo(new StyledText("world").hashCode())
+        .isNotEqualTo(FontStyle.BOLD.hashCode());
+
+    StyledText complex = new StyledText("One", BLUE).append("Two", RED).append("Three", GREEN);
+    assertThat(complex.hashCode())
+        .isEqualTo(complex.hashCode())
+        .isEqualTo(   new StyledText("One", BLUE).append("Two", RED ).append("Three", GREEN).hashCode())
+        .isNotEqualTo(new StyledText("One", RED ).append("Two", RED ).append("Three", GREEN).hashCode())
+        .isNotEqualTo(new StyledText("On",  BLUE).append("Two", RED ).append("Three", GREEN).hashCode())
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", BLUE).append("Three", GREEN).hashCode())
+        .isNotEqualTo(new StyledText("One", BLUE).append("Tw",  RED ).append("Three", GREEN).hashCode())
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", RED ).append("Thre",  GREEN).hashCode())
+        .isNotEqualTo(new StyledText("One", BLUE).append("Two", RED ).append("Three", RED  ).hashCode());
+  }
+  
+  @Test
+  public void _toString()
+  {
+    assertThat(new StyledText("hi").toString()).isEqualTo("hi");
+    
+    StyledText complex = new StyledText("One", BLUE).append("Two", RED).append("Three", GREEN);
+    assertThat(complex.toString()).isEqualTo("OneTwoThree");
   }
 }
