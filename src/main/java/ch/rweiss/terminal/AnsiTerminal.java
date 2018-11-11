@@ -588,5 +588,11 @@ public class AnsiTerminal
     {
       return reader.waitForKey();
     }
+
+    public Optional<Key> waitForKey(long timeoutInMillis)
+    {
+      return reader.waitForKey(timeoutInMillis);
+    }
   }
 }
+

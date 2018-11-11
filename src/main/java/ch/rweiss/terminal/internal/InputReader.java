@@ -30,6 +30,10 @@ public class InputReader extends Thread
         readFromTerminal();      
       } while (!isInterrupted());
     }
+    catch(@SuppressWarnings("unused") InterruptedException ex)
+    {      
+      // happens to signal shutdown -> ignore and exit
+    }
     catch(IOException ex)
     {
       ex.printStackTrace();
@@ -50,22 +54,39 @@ public class InputReader extends Thread
   
   public Key waitForKey()
   {
+    return waitForKey(0).get();
+  }
+  
+  public Optional<Key> waitForKey(long timeoutInMillis)
+  {
+    long entryTime = System.currentTimeMillis();
     synchronized(keys)
     {
       while (keys.isEmpty())
       {
+        long wait = 0;
+        if (timeoutInMillis > 0)
+        {
+          wait = entryTime+timeoutInMillis - System.currentTimeMillis();
+          if (wait <= 0L)
+          {
+            return Optional.empty();
+          }
+        }
+
         try
         {
-          keys.wait();
+          keys.wait(wait);
         }
         catch(InterruptedException ex)
         {
           throw new RuntimeException(ex);
         }
       }
-      return keys.removeLast();
+      return Optional.of(keys.removeLast());
     }
   }
+
   
   public void addPosition(EscCode escCode)
   {
@@ -104,7 +125,7 @@ public class InputReader extends Thread
     }
   }
   
-  private void readFromTerminal() throws IOException
+  private void readFromTerminal() throws IOException, InterruptedException
   {
     int ch = readChar();
     EscCodeParser parser = EscCodeParser.start((char)ch);
@@ -122,7 +143,7 @@ public class InputReader extends Thread
     addKey(escCode);
   }
 
-  private static EscCode parseEscCode(EscCodeParser parser) throws IOException
+  private EscCode parseEscCode(EscCodeParser parser) throws IOException, InterruptedException
   {
     int ch;
     while(parser.isNotComplete())
@@ -134,9 +155,18 @@ public class InputReader extends Thread
     return escCode;
   }
 
-  private static int readChar() throws IOException
+  private int readChar() throws IOException, InterruptedException
   {
-    return System.in.read();
+    if (isInterrupted())
+    {
+      throw new InterruptedException();
+    }
+    int ch = System.in.read();
+    if (isInterrupted())
+    {
+      throw new InterruptedException();
+    }
+    return ch;
   }
 
   private static boolean isPosition(EscCode escCode)
@@ -165,7 +195,7 @@ public class InputReader extends Thread
     }
   }
 
-  void shutdown()
+  public void shutdown()
   {
     interrupt();
     try
@@ -174,7 +204,7 @@ public class InputReader extends Thread
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
   }
 }
