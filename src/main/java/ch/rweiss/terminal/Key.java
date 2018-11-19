@@ -1,5 +1,7 @@
 package ch.rweiss.terminal;
 
+import ch.rweiss.terminal.internal.EscCodeParser;
+
 public abstract class Key
 {
   public static final Key UP = new Control(EscCode.csi('A'), "UP");
@@ -156,6 +158,14 @@ public abstract class Key
     return ""; 
   }
   
+  /**
+   * Either the printable character of the pressed key e.g. 'a'. '\033' ESCAPE for control keys 
+   */
+  public char toChar()
+  {
+    return ' ';
+  }
+  
   public static class Printable extends Key
   {
     private char ch;
@@ -181,6 +191,12 @@ public abstract class Key
     public String toString()
     {
       return ""+ch;
+    }
+    
+    @Override
+    public char toChar()
+    {
+      return ch;
     }
     
     @Override
@@ -266,6 +282,12 @@ public abstract class Key
     public String toString()
     {
       return name;
+    }
+    
+    @Override
+    public char toChar()
+    {
+      return EscCodeParser.ESCAPE;
     }
 
     public static Key forEscCode(EscCode escCode)
