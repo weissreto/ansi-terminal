@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import ch.rweiss.terminal.AnsiTerminal;
+import ch.rweiss.terminal.Key;
 import ch.rweiss.terminal.table.Column.ColumnBuilder;
 
 public class Table<R>
@@ -17,6 +18,7 @@ public class Table<R>
   AnsiTerminal term = AnsiTerminal.get();
   private RowSorter<R> sorter;
   private int topVisibleRow= 0;
+  private boolean hideHeader;
   
   public void addColumn(Column<R,?> column)
   {
@@ -51,37 +53,34 @@ public class Table<R>
     
   public void printSingleRow(R row)
   {
+    hideHeader();
     clear();
     addRow(row);
-    printWithoutHeader();
+    print();
   }
   
   public void print()
   {
     print(-1);
   }
-
-  public void printWithoutHeader()
-  {
-    layoutColumns();
-    printRows(-1);
-  }
   
   public void printTop()
   {
     int lines = term.cursor().maxPosition().line() - 
-                term.cursor().position().line() -  
-                1; // header line
+                term.cursor().position().line();
+    if (hideHeader == false)
+    {
+      lines = lines - 1;
+    }
     print(lines);
   }
-
+  
   public void print(int lines)
   {
-    layoutColumns();
+    layoutColumns();    
     printHeader();
     printRows(lines);
   }
-
 
   private void layoutColumns()
   {
@@ -96,6 +95,10 @@ public class Table<R>
 
   private void printHeader()
   {
+    if (hideHeader)
+    {
+      return;
+    }
     for (Column<R,?> column : columns)
     {
       column.printTitle();
@@ -104,6 +107,31 @@ public class Table<R>
     term.newLine();
   }
   
+  public boolean keyPressed(Key key)
+  {
+    if (key == Key.UP)
+    {
+      scrollUp();
+      return true;
+    }
+    if (key == Key.DOWN)
+    {
+      scrollDown();
+      return true;
+    }
+    if (key == Key.PAGE_UP)
+    {
+      scrollPageUp();
+      return true;
+    }
+    if (key == Key.PAGE_DOWN)
+    {
+      srollPageDown();
+      return true;
+    }
+    return false;
+  }
+
   public void scrollUp()
   {
     topVisibleRow--;
@@ -200,5 +228,10 @@ public class Table<R>
         .filter(column -> column.getTitle().equals(columnTitle))
         .findAny()
         .orElse(null);
+  }
+
+  public void hideHeader()
+  {
+    hideHeader = true;
   }
 }
