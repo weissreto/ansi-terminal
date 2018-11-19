@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import ch.rweiss.terminal.AnsiTerminal;
 import ch.rweiss.terminal.table.Column.ColumnBuilder;
@@ -15,6 +16,7 @@ public class Table<R>
   private final List<R> rows = new ArrayList<>();
   AnsiTerminal term = AnsiTerminal.get();
   private RowSorter<R> sorter;
+  private int topVisibleRow= 0;
   
   public void addColumn(Column<R,?> column)
   {
@@ -102,11 +104,52 @@ public class Table<R>
     term.newLine();
   }
   
+  public void scrollUp()
+  {
+    topVisibleRow--;
+    ensureTopRowIsVisible();
+  }
+
+  public void scrollDown()
+  {
+    topVisibleRow++;
+    ensureTopRowIsVisible();
+  }
+
+  public void srollPageDown()
+  {
+    topVisibleRow += getMaxAvailableHeight();
+    ensureTopRowIsVisible();
+  }
+
+  public void scrollPageUp()
+  {
+    topVisibleRow -= getMaxAvailableHeight();
+    ensureTopRowIsVisible();
+  }
+
+  private int getMaxAvailableHeight()
+  {
+    return term.cursor().maxPosition().line() - 5;
+  }
+
+  private void ensureTopRowIsVisible() 
+  {
+    if (topVisibleRow >= rows.size())
+    {
+      topVisibleRow = rows.size() - 1;
+    }
+    if (topVisibleRow < 0)
+    {
+      topVisibleRow = 0;
+    }
+  }
+
   private void printRows(int maxLines)
   {
     sortRows();
     int printedLines = 0;
-    for (R row : rows)
+    for (R row : rows.stream().skip(topVisibleRow).collect(Collectors.toList()))
     {
       int line = 0;
       boolean needMoreLines;

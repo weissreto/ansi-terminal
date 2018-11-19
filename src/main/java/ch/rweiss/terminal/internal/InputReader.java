@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Optional;
 
+import ch.rweiss.check.Check;
 import ch.rweiss.terminal.EscCode;
 import ch.rweiss.terminal.Key;
 import ch.rweiss.terminal.Position;
@@ -59,19 +60,16 @@ public class InputReader extends Thread
   
   public Optional<Key> waitForKey(long timeoutInMillis)
   {
+    Check.parameter("timeoutInMillis").withValue(timeoutInMillis).isPositive();
     long entryTime = System.currentTimeMillis();
     synchronized(keys)
     {
       while (keys.isEmpty())
       {
-        long wait = 0;
-        if (timeoutInMillis > 0)
+        long wait = entryTime+timeoutInMillis - System.currentTimeMillis();
+        if (wait <= 0L)
         {
-          wait = entryTime+timeoutInMillis - System.currentTimeMillis();
-          if (wait <= 0L)
-          {
-            return Optional.empty();
-          }
+        	return Optional.empty();
         }
 
         try
