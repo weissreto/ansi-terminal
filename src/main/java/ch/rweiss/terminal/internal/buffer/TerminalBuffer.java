@@ -1,30 +1,37 @@
 package ch.rweiss.terminal.internal.buffer;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import ch.rweiss.terminal.AnsiTerminal;
 import ch.rweiss.terminal.Color;
 import ch.rweiss.terminal.EscCode;
 import ch.rweiss.terminal.FontStyle;
+import ch.rweiss.terminal.Key;
 import ch.rweiss.terminal.Position;
-import ch.rweiss.terminal.internal.InputReader;
-import ch.rweiss.terminal.internal.Terminal;
+import ch.rweiss.terminal.internal.TerminalInput;
+import ch.rweiss.terminal.internal.TerminalOutput;
 
-public class TerminalBuffer implements Terminal
+public class TerminalBuffer implements TerminalOutput, TerminalInput
 {
-  private TerminalCharacter[][] buffer;
+  private final TerminalCharacter[][] buffer;
   private Position cursorPosition = new Position(1,1);
+  private Position currentPosition;
   private Color color = null;
   private Color backgroundColor = null;
   private FontStyle fontStyle = null;
-  private EscCodeInterpreter escCodeInterpreter = new EscCodeInterpreter(this);
-  private int lines;
-  private int columns;
-  private InputReader input;
+  private final EscCodeInterpreter escCodeInterpreter = new EscCodeInterpreter(this);
+  private final int lines;
+  private final int columns;
+  private final TerminalInput input;
   
-  public TerminalBuffer(InputReader input, int lines, int columns)
+  public TerminalBuffer(TerminalInput input, int lines, int columns)
   {
     this.input = input;
+    if (lines == Integer.MAX_VALUE)
+    {
+      lines = 80;
+    }
     this.lines = lines;
     this.columns = columns;
     buffer = new TerminalCharacter[lines][];
@@ -70,6 +77,36 @@ public class TerminalBuffer implements Terminal
   public void print(EscCode command)
   {
     escCodeInterpreter.interpret(command);
+  }
+  
+  @Override
+  public Optional<Key> readKey()
+  {
+    return input.readKey();
+  }
+  
+  @Override
+  public Key waitForKey()
+  {
+    return input.waitForKey();
+  }
+  
+  @Override
+  public Optional<Key> waitForKey(long timeoutInMillis)
+  {
+    return input.waitForKey(timeoutInMillis);
+  }
+  
+  @Override
+  public void resetPositions()
+  {
+    currentPosition = null;
+  }
+  
+  @Override
+  public Position waitForPosition()
+  {
+    return currentPosition;
   }
     
   public void writeTo(AnsiTerminal ansiTerminal)
@@ -270,7 +307,6 @@ public class TerminalBuffer implements Terminal
 
   void writePosition()
   {
-    EscCode position = EscCode.csi('R', cursorPosition.line(), cursorPosition.column());
-    input.addPosition(position);
+    currentPosition = cursorPosition;
   }
 }

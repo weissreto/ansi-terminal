@@ -10,14 +10,14 @@ import ch.rweiss.terminal.EscCode;
 import ch.rweiss.terminal.Key;
 import ch.rweiss.terminal.Position;
 
-public class InputReader extends Thread  
+public class AnsiTerminalInput extends Thread implements TerminalInput  
 {
   private Deque<Key> keys = new LinkedList<>();
   private Deque<Position> positions = new LinkedList<>();
 
-  public InputReader()
+  public AnsiTerminalInput()
   {
-    super(InputReader.class.getSimpleName());
+    super(AnsiTerminalInput.class.getSimpleName());
     setDaemon(true);
   }
 
@@ -41,6 +41,7 @@ public class InputReader extends Thread
     }
   }
   
+  @Override
   public Optional<Key> readKey()
   {
     synchronized(keys)
@@ -53,11 +54,13 @@ public class InputReader extends Thread
     }
   }
   
+  @Override
   public Key waitForKey()
   {
     return waitForKey(0).get();
   }
   
+  @Override
   public Optional<Key> waitForKey(long timeoutInMillis)
   {
     Check.parameter("timeoutInMillis").withValue(timeoutInMillis).isPositive();
@@ -84,9 +87,8 @@ public class InputReader extends Thread
       return Optional.of(keys.removeLast());
     }
   }
-
   
-  public void addPosition(EscCode escCode)
+  private void addPosition(EscCode escCode)
   {
     Position position = new Position(escCode.csiArguments()[0], escCode.csiArguments()[1]);
     synchronized(positions)
@@ -96,6 +98,7 @@ public class InputReader extends Thread
     }
   }
 
+  @Override
   public void resetPositions()
   {
     synchronized(positions)
@@ -104,6 +107,7 @@ public class InputReader extends Thread
     }
   }
 
+  @Override
   public Position waitForPosition() 
   {
     synchronized(positions)

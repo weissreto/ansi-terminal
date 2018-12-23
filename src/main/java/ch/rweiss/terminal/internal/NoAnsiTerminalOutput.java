@@ -2,7 +2,7 @@ package ch.rweiss.terminal.internal;
 
 import ch.rweiss.terminal.EscCode;
 
-public class SystemTerminal implements Terminal
+public class NoAnsiTerminalOutput implements TerminalOutput
 {
   @Override
   public void print(String text)
@@ -11,9 +11,9 @@ public class SystemTerminal implements Terminal
   }
 
   @Override
-  public void print(char character)
+  public void print(char text)
   {
-    System.out.print(character);    
+    System.out.print(text);
   }
 
   @Override
@@ -31,6 +31,7 @@ public class SystemTerminal implements Terminal
   @Override
   public void print(EscCode command)
   {
-    System.out.print(command.escCode());
+    // EscCode cannot be printed on non ansi terminal 
   }
+
 }

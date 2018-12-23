@@ -4,9 +4,8 @@ import java.util.Optional;
 
 import ch.rweiss.check.Check;
 import ch.rweiss.terminal.graphics.Graphics;
-import ch.rweiss.terminal.internal.InputReader;
-import ch.rweiss.terminal.internal.SystemTerminal;
-import ch.rweiss.terminal.internal.Terminal;
+import ch.rweiss.terminal.internal.TerminalInput;
+import ch.rweiss.terminal.internal.TerminalOutput;
 import ch.rweiss.terminal.internal.buffer.TerminalBuffer;
 import ch.rweiss.terminal.nativ.NativeTerminal;
 import ch.rweiss.terminal.nativ.NativeTerminalException;
@@ -14,9 +13,10 @@ import ch.rweiss.terminal.nativ.NativeTerminalException;
 public class AnsiTerminal 
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
-  private final Terminal systemTerminal = new SystemTerminal();
-  private Terminal terminal = systemTerminal;
-  final InputReader reader = new InputReader();
+  private final TerminalOutput systemOutput;
+  private TerminalOutput terminalOutput;
+  private final TerminalInput systemInput;
+  TerminalInput terminalInput;
   private final FontStyleInline fontStyleInline = new FontStyleInline();
   private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
@@ -25,25 +25,40 @@ public class AnsiTerminal
   private final Clear clear = new Clear(this);
   private final OffScreen offScreen = new OffScreen();
   private final Input input = new Input();
+  private final boolean ansi;
   
   private AnsiTerminal()
+  {
+    ansi = initNativeTerminal();
+    systemOutput = TerminalOutput.create(ansi);
+    terminalOutput = systemOutput;
+    systemInput = TerminalInput.create(ansi);
+    terminalInput = systemInput;
+  }
+  
+  private static boolean initNativeTerminal()
   {
     try
     {
       NativeTerminal.enableAnsi();
+      return true;
     }
     catch(NativeTerminalException ex)
     {
       System.err.println(AnsiTerminal.class.getSimpleName()+" not supported on this platform!");
       System.err.println("Error Details: "+ex.getMessage());
+      return false;
     }
-    terminal = new SystemTerminal();
-    reader.start();
   }
 
   public static AnsiTerminal get()
   {
     return INSTANCE;
+  }
+  
+  public boolean isAnsi()
+  {
+    return ansi;
   }
   
   public AnsiTerminal write(StyledText text)
@@ -65,19 +80,19 @@ public class AnsiTerminal
   
   public AnsiTerminal write(String text)
   {
-    terminal.print(text);
+    terminalOutput.print(text);
     return this;
   }
   
   public AnsiTerminal write(char ch)
   {
-    terminal.print(ch);
+    terminalOutput.print(ch);
     return this;
   }
   
   public AnsiTerminal write(long value)
   {
-    terminal.print(value);
+    terminalOutput.print(value);
     return this;
   }
   
@@ -85,13 +100,13 @@ public class AnsiTerminal
   {
     Check.parameter("command").withValue(command).isNotNull();
     
-    terminal.print(command);
+    terminalOutput.print(command);
     return this;
   }
   
   public AnsiTerminal newLine()
   {
-    terminal.println();
+    terminalOutput.println();
     return this;
   }
   
@@ -425,9 +440,9 @@ public class AnsiTerminal
     
     public Position position()
     {
-      reader.resetPositions();
+      terminalInput.resetPositions();
       write(EscCode.csi('n', 6));
-      Position position = reader.waitForPosition();
+      Position position = terminalInput.waitForPosition();
       return position;
     }
     
@@ -543,13 +558,14 @@ public class AnsiTerminal
     public void on()
     {
       Position position = cursor().maxPosition();
-      on(new TerminalBuffer(reader, position.line(), position.column()));
+      on(new TerminalBuffer(terminalInput, position.line(), position.column()));
     }
 
     void on(TerminalBuffer buffer)
     {
       offScreenBuffer = buffer;
-      terminal = offScreenBuffer;
+      terminalOutput = offScreenBuffer;
+      terminalInput = offScreenBuffer;
     }
 
     public void syncToScreen()
@@ -558,22 +574,23 @@ public class AnsiTerminal
       {
         return;
       }
-      Terminal current = terminal;
-      terminal = systemTerminal;
+      TerminalOutput current = terminalOutput;
+      terminalOutput = systemOutput;
       try
       {
         offScreenBuffer.writeTo(AnsiTerminal.this);
       }
       finally
       {
-        terminal = current;
+        terminalOutput = current;
       }
     }
 
     public void off()
     {
       offScreenBuffer = null;
-      terminal = systemTerminal;
+      terminalOutput = systemOutput;
+      terminalInput = systemInput;
     }
   }
   
@@ -581,17 +598,17 @@ public class AnsiTerminal
   {
     public Optional<Key> readKey()
     {
-      return reader.readKey();
+      return terminalInput.readKey();
     }
 
     public Key waitForKey()
     {
-      return reader.waitForKey();
+      return terminalInput.waitForKey();
     }
 
     public Optional<Key> waitForKey(long timeoutInMillis)
     {
-      return reader.waitForKey(timeoutInMillis);
+      return terminalInput.waitForKey(timeoutInMillis);
     }
   }
 }
