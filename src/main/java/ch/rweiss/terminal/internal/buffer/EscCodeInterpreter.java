@@ -178,6 +178,12 @@ class EscCodeInterpreter
       case 'n':
         getPosition(command.csiArguments());
         break;
+      case 'h':
+        // hide cursor -> not implemented
+        break;
+      case 'l':
+        // show cursor -> not implemented
+        break;
       default:
         throw new IllegalArgumentException("Unkown csi command "+command.csiCommand());
     }
