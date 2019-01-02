@@ -288,7 +288,7 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
     }
   }
 
-  String dump()
+  public String dump()
   {
     StringBuilder builder = new StringBuilder();
     for (int line = 1; line <= lines; line++)
