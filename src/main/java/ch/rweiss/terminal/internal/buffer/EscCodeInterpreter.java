@@ -142,9 +142,6 @@ class EscCodeInterpreter
   {
     switch(command.csiCommand())
     {
-      case '?':
-        cursor(command);
-        break;
       case 'A':
         up(command.csiArguments());
         break;
@@ -179,10 +176,8 @@ class EscCodeInterpreter
         getPosition(command.csiArguments());
         break;
       case 'h':
-        // hide cursor -> not implemented
-        break;
       case 'l':
-        // show cursor -> not implemented
+        cursor(command);
         break;
       default:
         throw new IllegalArgumentException("Unkown csi command "+command.csiCommand());
@@ -253,11 +248,11 @@ class EscCodeInterpreter
 
   private void cursor(EscCode command)
   {
-    if (command.escCode().endsWith("25h"))
+    if (command.escCode().endsWith("?25h"))
     {
       hideCursor();
     }
-    else if (command.escCode().endsWith("25l"))
+    else if (command.escCode().endsWith("?25l"))
     {
       showCursor();
     }

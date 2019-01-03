@@ -30,7 +30,7 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
     this.input = input;
     if (lines == Integer.MAX_VALUE)
     {
-      lines = 80;
+      lines = 32000;
     }
     this.lines = lines;
     this.columns = columns;
@@ -55,9 +55,16 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
   @Override
   public void print(char ch)
   {
-    TerminalCharacter newCharacter = new TerminalCharacter(ch, color, backgroundColor, fontStyle);
-    setCurrentCharacter(newCharacter);
-    moveCursorForward();
+    if (ch == '\n')
+    {
+      println();
+    }
+    else
+    {
+      TerminalCharacter newCharacter = new TerminalCharacter(ch, color, backgroundColor, fontStyle);
+      setCurrentCharacter(newCharacter);
+      moveCursorForward();
+    }
   }
   
   @Override

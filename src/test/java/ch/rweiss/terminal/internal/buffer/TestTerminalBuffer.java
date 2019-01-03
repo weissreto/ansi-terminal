@@ -46,6 +46,18 @@ public class TestTerminalBuffer
                    "          \n" + 
                    "          ");
   }
+  
+  @Test
+  public void writeWithNewLine()
+  {
+    terminal.write("12345\n67890\n123");
+    assertThat(testee.dump())
+        .isEqualTo("12345     \n" + 
+                   "67890     \n" + 
+                   "123       \n" + 
+                   "          \n" + 
+                   "          ");
+  }
 
   @Test
   public void upAndDown()
@@ -144,6 +156,32 @@ public class TestTerminalBuffer
                    "          ");
   }
   
+  @Test
+  public void cursorHide()
+  {
+    terminal.cursor().hide();
+    assertThat(testee.dump())
+        .as("cursor hide should be ignored but should not throw an exception")
+        .isEqualTo("          \n" + 
+                   "          \n" + 
+                   "          \n" + 
+                   "          \n" + 
+                   "          ");
+  }
+  
+  @Test
+  public void cursorShow()
+  {
+    terminal.cursor().show();
+    assertThat(testee.dump())
+        .as("cursor show should be ignored but should not throw an exception")
+        .isEqualTo("          \n" + 
+                   "          \n" + 
+                   "          \n" + 
+                   "          \n" + 
+                   "          ");
+  }
+
   @Test
   public void newLine()
   {
