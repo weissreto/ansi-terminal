@@ -24,16 +24,14 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
   private final int lines;
   private final int columns;
   private final TerminalInput input;
+  private final TerminalOutput output;
   
-  public TerminalBuffer(TerminalInput input, int lines, int columns)
+  public TerminalBuffer(TerminalInput input, TerminalOutput output, Position maxPosition)
   {
     this.input = input;
-    if (lines == Integer.MAX_VALUE)
-    {
-      lines = 32000;
-    }
-    this.lines = lines;
-    this.columns = columns;
+    this.output = output;
+    this.lines = maxPosition.line() == Integer.MAX_VALUE ? 32000 : maxPosition.line();
+    this.columns = maxPosition.column();
     buffer = new TerminalCharacter[lines][];
     for (int row = 0; row < lines; row++)
     {
@@ -116,12 +114,12 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
     return currentPosition;
   }
     
-  public void writeTo(AnsiTerminal ansiTerminal)
+  public void writeTo(AnsiTerminal ansiTerminal, boolean isTerminalBufferActive)
   {
     ansiTerminal.cursor().position(1, 1);
     for (int line = 1; line <= lines; line++)
     {
-      if (line > 1)
+      if (line > 1 && !isTerminalBufferActive)
       {
         ansiTerminal.newLine();
       }
@@ -130,6 +128,20 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
         getCharacter(line, column).writeTo(ansiTerminal);
       }
     }
+    if (isTerminalBufferActive)
+    {
+      ansiTerminal.cursor().position(cursorPosition);
+    }
+  }
+  
+  public TerminalInput input()
+  {
+    return input;
+  }
+
+  public TerminalOutput output()
+  {
+    return output;
   }
 
   private void setCurrentCharacter(TerminalCharacter newCharacter)
@@ -315,5 +327,11 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
   void writePosition()
   {
     currentPosition = cursorPosition;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return dump();
   }
 }

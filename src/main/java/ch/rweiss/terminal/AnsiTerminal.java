@@ -13,10 +13,8 @@ import ch.rweiss.terminal.nativ.NativeTerminalException;
 public class AnsiTerminal 
 {
   private static final AnsiTerminal INSTANCE = new AnsiTerminal();
-  private final TerminalOutput systemOutput;
   private TerminalOutput terminalOutput;
-  private final TerminalInput systemInput;
-  TerminalInput terminalInput;
+  private TerminalInput terminalInput;
   private final FontStyleInline fontStyleInline = new FontStyleInline();
   private final ForegroundColor foregroundColor = new ForegroundColor();
   private final BackgroundColor backgroundColor = new BackgroundColor();
@@ -30,10 +28,8 @@ public class AnsiTerminal
   private AnsiTerminal()
   {
     ansi = initNativeTerminal();
-    systemOutput = TerminalOutput.create(ansi);
-    terminalOutput = systemOutput;
-    systemInput = TerminalInput.create(ansi);
-    terminalInput = systemInput;
+    terminalOutput = TerminalOutput.create(ansi);
+    terminalInput = TerminalInput.create(ansi);
   }
   
   private static boolean initNativeTerminal()
@@ -557,11 +553,15 @@ public class AnsiTerminal
 
     public void on()
     {
-      Position position = cursor().maxPosition();
-      on(new TerminalBuffer(terminalInput, position.line(), position.column()));
+      on(cursor().maxPosition());
+    }
+    
+    public void on(Position maxTerminalPosition)
+    {
+      on(new TerminalBuffer(terminalInput, terminalOutput, maxTerminalPosition));
     }
 
-    void on(TerminalBuffer buffer)
+    private void on(TerminalBuffer buffer)
     {
       offScreenBuffer = buffer;
       terminalOutput = offScreenBuffer;
@@ -569,28 +569,38 @@ public class AnsiTerminal
     }
 
     public void syncToScreen()
-    {
+    {      
       if (offScreenBuffer == null)
       {
         return;
       }
-      TerminalOutput current = terminalOutput;
-      terminalOutput = systemOutput;
+      TerminalBuffer buffer = offScreenBuffer;
+      off();
       try
       {
-        offScreenBuffer.writeTo(AnsiTerminal.this);
+        buffer.writeTo(AnsiTerminal.this, offScreenBuffer != null);
       }
       finally
       {
-        terminalOutput = current;
+        on(buffer);
       }
     }
 
     public void off()
     {
-      offScreenBuffer = null;
-      terminalOutput = systemOutput;
-      terminalInput = systemInput;
+      if (offScreenBuffer != null)
+      {
+        terminalInput = offScreenBuffer.input();
+        terminalOutput = offScreenBuffer.output();
+        if (terminalInput instanceof TerminalBuffer)
+        {
+          offScreenBuffer = (TerminalBuffer)terminalInput;
+        }
+        else
+        {
+          offScreenBuffer = null;
+        }
+      }
     }
   }
   

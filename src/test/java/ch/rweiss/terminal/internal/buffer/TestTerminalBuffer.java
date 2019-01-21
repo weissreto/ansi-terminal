@@ -15,12 +15,13 @@ import ch.rweiss.terminal.Position;
 public class TestTerminalBuffer
 {
   private AnsiTerminal terminal = AnsiTerminal.get();
-  private TerminalBuffer testee = new TerminalBuffer(Helper.getInputReaderOf(terminal), 5, 10);
+  private TerminalBuffer testee;
 
   @BeforeEach
   public void before()
   {
-    Helper.setOffScreenBufferFor(terminal, testee);
+    terminal.offScreen().on(new Position(5,10));
+    testee = Helper.getOffScreenBuffer(terminal);
   }
 
   @Test

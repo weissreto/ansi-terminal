@@ -62,5 +62,11 @@ public class TerminalCharacter
   {
     return fontStyle;
   }
+  
+  @Override
+  public String toString()
+  {
+    return ""+dump();
+  }
 
 }
