@@ -218,6 +218,13 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
     int column = cursorPosition.column();
     column = column + columnDelta;
     line = line + lineDelta;
+    if (column > columns && 
+        line >= lines)  
+    {
+      // move out of screen during
+      column = columns;
+      line = lines;
+    }
     if (column < 1)
     {
       column = columns;
@@ -230,11 +237,11 @@ public class TerminalBuffer implements TerminalOutput, TerminalInput
     }
     if (line < 1)
     {
-      line = lines;
+      line = 1;
     }
     if (line > lines)
     {
-      line = 1;
+      line = lines;
     }
     moveCursorTo(line, column);
   }
